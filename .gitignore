@@ -1,0 +1,7 @@
+# IDE local files
+.mxproject
+.settings
+
+# Output files
+Debug/
+Release/
