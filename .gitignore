@@ -3,5 +3,5 @@
 .settings
 
 # Output files
-Debug/
-Release/
+debug/
+release/
