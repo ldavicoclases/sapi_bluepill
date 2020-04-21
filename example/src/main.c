@@ -28,14 +28,32 @@ void SystemClock_Config(void);
   */
 int main(void)
 {
-  HAL_Init();
+    uint8_t i;
+    gpioMap_t secuencia[] = {PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
+					         PA8, PA9, PA10, PA11, PA12, PA15,
+   	   	   	   	   	   	   	 PB0, PB1, PB3, PB4, PB5, PB6, PB7,
+   	   	   	   	   	   	     PB8, PB9, PB10, PB11, PB12, PB13, PB14, PB15};
 
-  SystemClock_Config();
+    HAL_Init();
 
-  while (1)
-  {
+    SystemClock_Config();
 
-  }
+    /* GPIO Ports Clock Enable */
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+
+    for( i=0 ; i<sizeof(secuencia) ; i++ ) {
+    	gpioInit(secuencia[i], GPIO_OUTPUT);
+    }
+
+    while (1)
+    {
+    	for( i=0 ; i<sizeof(secuencia) ; i++ ) {
+			gpioToggle(secuencia[i]);
+			HAL_Delay(100);
+		}
+    }
 }
 
 /**
@@ -70,6 +88,17 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+
+  /**Configure the Systick interrupt time
+  */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+  /**Configure the Systick
+  */
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+  /* SysTick_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 /**

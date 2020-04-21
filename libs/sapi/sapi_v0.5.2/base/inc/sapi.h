@@ -55,7 +55,7 @@
 #include "sapi_rtc.h"                    // Use RTC peripheral
 #include "sapi_sleep.h"                  // Use ARM ASM instructions
 #include "sapi_cyclesCounter.h"          // Use ARM Debug Registers
-#include "sapi_usb_device.h"
+//#include "sapi_usb_device.h"
 
 // High Level drivers
 
@@ -75,6 +75,7 @@
 
 // External Peripheral Drivers
 
+/*
 #include "sapi_7_segment_display.h"      // Use sapi_gpio and sapi_delay modules
 #include "sapi_keypad.h"                 // Use sapi_gpio and sapi_delay modules
 #include "sapi_dht11.h"                  // Use sapi_gpio peripheral
@@ -91,6 +92,7 @@
 #include "sapi_eeprom24xx1025.h"         // Use sapi_i2c module
 
 #include "sapi_ultrasonic_hcsr04.h"      //
+*/
 
 /*==================[c++]====================================================*/
 #ifdef __cplusplus

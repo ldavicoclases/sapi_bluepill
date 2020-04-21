@@ -1,4 +1,5 @@
 /* Copyright 2015, Eric Pernia.
+ * Copyright 2020, Nahuel Espinosa.
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -62,31 +63,33 @@ extern "C" {
  *  OUTPUT =  1
  *  INPUT_PULLUP
  *  INPUT_PULLDOWN
- *  INPUT_REPEATER (PULLUP and PULLDOWN)
- *  INITIALIZE
+ *  INPUT_PULLUP_PULLDOWN
+ *  ALT_FUNCTION
  */
 typedef enum {
    GPIO_INPUT, GPIO_OUTPUT,
    GPIO_INPUT_PULLUP, GPIO_INPUT_PULLDOWN,
    GPIO_INPUT_PULLUP_PULLDOWN,
-   GPIO_ENABLE
+   GPIO_ALT_FUNCTION
 } gpioInit_t;
 
 
-/* ----- Begin Pin Init Structs NXP LPC4337 ----- */
+/* ----- Begin Pin Init Structs STM32F1xx ------ */
 
-typedef struct {
-   int8_t port;
-   int8_t pin;
-} gpioInitLpc4337_t;
+typedef struct{
+   GPIO_TypeDef * port;
+   uint16_t pin;
+} gpioInitStm32f1xx_t;
 
-typedef struct {
-   pinInitLpc4337_t pinName;
-   int8_t func;
-   gpioInitLpc4337_t gpio;
-} pinInitGpioLpc4337_t;
+typedef struct{
+   gpioInitStm32f1xx_t gpio;
+                int8_t mode;
+                int8_t pull;
+                int8_t speed;
+                int8_t alternate;
+} pinInitGpioStm32f1xx_t;
 
-/* ------ End Pin Init Structs NXP LPC4337 ------ */
+/* ------ End Pin Init Structs STM32F1xx ------- */
 
 /*==================[external data declaration]==============================*/
 

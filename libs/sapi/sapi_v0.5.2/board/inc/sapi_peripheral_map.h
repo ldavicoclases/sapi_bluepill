@@ -1,6 +1,7 @@
 /* Copyright 2015, Eric Pernia.
  * Copyright 2016, Ian Olivieri.
  * Copyright 2016, Eric Pernia.
+ * Copyright 2020, Nahuel Espinosa.
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -32,7 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Date: 2015-09-23 */
+/* Date: 2020-04-21 */
 
 #ifndef _SAPI_PERIPHERALMAP_H_
 #define _SAPI_PERIPHERALMAP_H_
@@ -40,6 +41,7 @@
 /*==================[inclusions]=============================================*/
 
 #include "sapi_datatypes.h"
+#include "stm32f1xx_hal.h"
 
 /*==================[c++]====================================================*/
 #ifdef __cplusplus
@@ -48,137 +50,48 @@ extern "C" {
 
 /*==================[typedef]================================================*/
 
-/* ----- Begin Pin Init Structs NXP LPC4337 ----- */
 
-typedef struct {
-   int8_t port;
-   int8_t pin;
-} pinInitLpc4337_t;
-
-typedef struct {
-   uint8_t lpcScuPort;
-   uint8_t lpcScuPin;
-   uint8_t lpcScuFunc;
-} lpc4337ScuPin_t;
-
-/* ------ End Pin Init Structs NXP LPC4337 ------ */
-
-
-/* ------- Begin EDU-CIAA-NXP Peripheral Map ------ */
+/* ------- Begin STM32F106C8 BLUEPILL Peripheral Map ------ */
 
 /* Defined for sapi_gpio.h */
 
-//#define BOARD edu_ciaa_nxp
-
 typedef enum {
 
-   // Configure GPIO pins for each board
+   VCC = -2, GND = -1,
 
-   #if (BOARD == ciaa_nxp)
-      VCC = -2, GND = -1,
-      // Born
-      DI0,   DI1,   DI2,   DI3,   DI4,   DI5,   DI6,   DI7,
-      DO0,   DO1,   DO2,   DO3,   DO4,   DO5,   DO6,   DO7,
-      // P12 header
-      GPIO0, GPIO1, GPIO2, GPIO3, GPIO7, GPIO8, 
-      // P14 header
-      SPI_MISO, SPI_MOSI, SPI_CS,
-      //#error CIAA-NXP
+   // Left header
+   PB12, PB13, PB14, PB15, PA8 , PA9 , PA10, PA11, PA12, PA15, PB3 , PB4 , PB5 , PB6 , PB7 , PB8 , PB9,
 
-   #elif (BOARD == edu_ciaa_nxp)
-      VCC = -2, GND = -1,
-      // P1 header
-      T_FIL1,    T_COL2,    T_COL0,    T_FIL2,      T_FIL3,  T_FIL0,     T_COL1,
-      CAN_TD,    CAN_RD,    RS232_TXD, RS232_RXD,
-      // P2 header
-      GPIO8,     GPIO7,     GPIO5,     GPIO3,       GPIO1,
-      LCD1,      LCD2,      LCD3,      LCDRS,       LCD4,
-      SPI_MISO,
-      ENET_TXD1, ENET_TXD0, ENET_MDIO, ENET_CRS_DV, ENET_MDC, ENET_TXEN, ENET_RXD1,
-      GPIO6,     GPIO4,     GPIO2,     GPIO0,
-      LCDEN,
-      SPI_MOSI,
-      ENET_RXD0,
-      // Switches
-      // 36   37     38     39
-      TEC1,  TEC2,  TEC3,  TEC4,
-      // Leds
-      // 40   41     42     43     44     45
-      LEDR,  LEDG,  LEDB,  LED1,  LED2,  LED3,
-      //#error EDU-CIAA-NXP
-   #else
-      #error BOARD not supported yet!
-   #endif
+   // Right header
+   PB11, PB10, PB1 , PB0 , PA7 , PA6 , PA5 , PA4 , PA3 , PA2 , PA1 , PA0 , PC15, PC14, PC13
+
 } gpioMap_t;
 
-// Configure GPIO pins for each board
-
-#if (BOARD == ciaa_nxp)
-   #define BTN                 DI7
-   #define LED                 DO7
-#elif (BOARD == edu_ciaa_nxp)
-   #define BTN                 TEC1
-   #define LED                 LEDB
-#else
-   #error BOARD not supported yet!
-#endif
-#define CIAA_BOARD_BUTTON   BTN
-#define CIAA_BOARD_LED      LED
+#define BTN		RST
+#define LED		PC13
 
 /* Defined for sapi_adc.h */
 typedef enum {
-	#if (BOARD == ciaa_nxp)
-	   AI0 = 0, // AIN0 =   2 ADC0_1/ADC1_1
-	   AI1 = 1, // AIN1 = 143 ADC0_2/ADC1_2
-	   AI2 = 2, // AIN2 = 139 ADC0_3/ADC1_3
-	   AI3 = 3, // AIN3 = 138 ADC0_4/ADC1_4
-	#elif (BOARD == edu_ciaa_nxp)
-	   CH1 = 0, // CH1 =   2 ADC0_1/ADC1_1
-	   CH2 = 1, // CH2 = 143 ADC0_2/ADC1_2
-	   CH3 = 2, // CH3 = 139 ADC0_3/ADC1_3
-	#else
-	   #error BOARD not supported yet!
-	#endif
+   CH0 = 0,
+   CH1 = 1,
+   CH2 = 2,
+   CH3 = 3,
 } adcMap_t;
 
 /* Defined for sapi_dac.h */
 typedef enum {
-	#if (BOARD == ciaa_nxp)
-		AO  = 0,
-		AO0 = 0,
-	#elif (BOARD == edu_ciaa_nxp)
-		DAC  = 0,
-		DAC0 = 0,
-	#else
-	   #error BOARD not supported yet!
-	#endif
+   A0 = 0,
 } dacMap_t;
 
 /* Defined for sapi_uart.h */
-// Note that:
-// - If use UART_GPIO you can't use UART_485 and vice versa.
-// - If use UART_USB you can't use UART_ENET and vice versa.
 typedef enum {
-	#if (BOARD == ciaa_nxp)
-	   UART_485  = 1, // Hardware UART0 via RS_485 A, B and GND Borns
-					  // Hardware UART1 not routed
-	   UART_USB  = 3, // Hardware UART2 via USB DEBUG port
-	   UART_232  = 5, // Hardware UART3 via 232_RX and 232_tx pins on header P1
-	#elif (BOARD == edu_ciaa_nxp)
-	   UART_GPIO = 0, // Hardware UART0 via GPIO1(TX), GPIO2(RX) pins on header P0
-	   UART_485  = 1, // Hardware UART0 via RS_485 A, B and GND Borns
-		// Hardware UART1 not routed
-	   UART_USB  = 3, // Hardware UART2 via USB DEBUG port
-	   UART_ENET = 4, // Hardware UART2 via ENET_RXD0(TX), ENET_CRS_DV(RX) pins on header P0
-	   UART_232  = 5, // Hardware UART3 via 232_RX and 232_tx pins on header P1
-	#else
-	   #error BOARD not supported yet!
-	#endif
+   UART_1,
+   UART_2,
+   UART_USB,
    UART_MAXNUM,
 } uartMap_t;
 
 /*Defined for sapi_timer.h*/
-//NOTE: if servo is enable (servoInit used) the only available timer to use is TIMER0
 typedef enum {
    TIMER0, TIMER1, TIMER2, TIMER3
 } timerMap_t;
@@ -187,8 +100,6 @@ typedef enum {
 } timerCompareMatch_t;
 
 /*Defined for sapi_sct.h*/
-// NOTE: CTOUT11 has no SCT mode associated, so it can't be used!
-// NOTE: if pwm is enable (pwmInit used) there will be no sct channels available
 typedef enum {
    CTOUT0, CTOUT1, CTOUT2, CTOUT3, CTOUT4, CTOUT5, CTOUT6, CTOUT7, CTOUT8,
    CTOUT9, CTOUT10, CTOUT11, CTOUT12, CTOUT13
@@ -204,13 +115,6 @@ typedef enum {
    SERVO0, SERVO1, SERVO2, SERVO3, SERVO4, SERVO5, SERVO6, SERVO7, SERVO8
 } servoMap_t;
 
-/*Defined for sapi_i2c.h*/
-/* Comment because already defined in "i2c_18xx_43xx.h"*/
-/*
-typedef enum{
-   I2C0 // TODO: Add support for I2C1
-} i2cMap_t;
-*/
 typedef uint8_t i2cMap_t;
 
 typedef enum {
