@@ -78,6 +78,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="libs/sapi" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="libs/sapi/sapi_v0.5.2/base"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -159,6 +160,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="libs/sapi" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="libs/sapi/sapi_v0.5.2/base"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
