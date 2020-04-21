@@ -13,6 +13,10 @@ STM32CubeIDE
 Version: 1.3.1
 Build: 6291_20200406_0752 (UTC)
 ```
+Firmware package:
+```
+STM32Cube FW_F1 V1.8.0
+```
 Libraries used:
 ```
 sAPI version: 0.5.2
