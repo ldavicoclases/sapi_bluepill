@@ -237,6 +237,8 @@ void tickerCallback( void )   // Before SysTick_Handler
    if( (tickHookFunction != NULL) ) {
       (* tickHookFunction )( callBackFuncParams );
    }
+
+   HAL_IncTick();
 }
 
 /*==================[end of file]============================================*/

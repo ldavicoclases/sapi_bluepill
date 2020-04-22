@@ -1,4 +1,5 @@
 /* Copyright 2015-2016, Eric Pernia.
+ * Copyright 2020, Nahuel Espinosa
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -31,7 +32,7 @@
  *
  */
 
-/* Date: 2015-09-23 */
+/* Date: 2020-04-21 */
 
 /*==================[inclusions]=============================================*/
 
@@ -53,81 +54,70 @@
 
 /*==================[internal functions definition]==========================*/
 
+void SystemClock_Config(void);
+
 /*==================[external functions definition]==========================*/
 
 /* Set up and initialize board hardware */
 void boardInit(void)
 {
+   // Reset of all peripherals, Initializes the Flash interface and the Systick
+   HAL_Init();
+
+   // Configure the system clock
+   SystemClock_Config();
+
    // Read clock settings and update SystemCoreClock variable
    SystemCoreClockUpdate();
 
-   cyclesCounterInit( SystemCoreClock );
+   // cyclesCounterInit( SystemCoreClock );
 
    // Inicializar el conteo de Ticks con resolucion de 1ms (si no se usa freeRTOS)
    #ifndef USE_FREERTOS
       tickInit( 1 );
    #endif
 
-   // Configure GPIO pins for each board
-   #if BOARD==ciaa_nxp
+   // GPIO Ports Clock Enable
+   __HAL_RCC_GPIOA_CLK_ENABLE();
+   __HAL_RCC_GPIOB_CLK_ENABLE();
+   __HAL_RCC_GPIOC_CLK_ENABLE();
+}
 
-      // Inicializar GPIOs
-      gpioInit( 0, GPIO_ENABLE );
+/* System Clock Configuration */
+void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-      // Configuracion de pines de entrada de la CIAA-NXP
-      gpioInit( DI0, GPIO_INPUT );
-      gpioInit( DI1, GPIO_INPUT );
-      gpioInit( DI2, GPIO_INPUT );
-      gpioInit( DI3, GPIO_INPUT );
-      gpioInit( DI4, GPIO_INPUT );
-      gpioInit( DI5, GPIO_INPUT );
-      gpioInit( DI6, GPIO_INPUT );
-      gpioInit( DI7, GPIO_INPUT );
+    /** Initializes the CPU, AHB and APB busses clocks
+    */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-      // Configuracion de pines de salida de la CIAA-NXP
-      gpioInit( DO0, GPIO_OUTPUT );
-      gpioInit( DO1, GPIO_OUTPUT );
-      gpioInit( DO2, GPIO_OUTPUT );
-      gpioInit( DO3, GPIO_OUTPUT );
-      gpioInit( DO4, GPIO_OUTPUT );
-      gpioInit( DO5, GPIO_OUTPUT );
-      gpioInit( DO6, GPIO_OUTPUT );
-      gpioInit( DO7, GPIO_OUTPUT );
+    /** Initializes the CPU, AHB and APB busses clocks
+    */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                                  |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-      //#error CIAA-NXP
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
 
-   #elif BOARD==edu_ciaa_nxp
+    /**Configure the Systick interrupt time
+    */
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
-      // Inicializar GPIOs
-      gpioInit( 0, GPIO_ENABLE );
+    /**Configure the Systick
+    */
+    HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-      // Configuracion de pines de entrada para Teclas de la EDU-CIAA-NXP
-      gpioInit( TEC1, GPIO_INPUT );
-      gpioInit( TEC2, GPIO_INPUT );
-      gpioInit( TEC3, GPIO_INPUT );
-      gpioInit( TEC4, GPIO_INPUT );
-
-      // Configuracion de pines de salida para Leds de la EDU-CIAA-NXP
-      gpioInit( LEDR, GPIO_OUTPUT );
-      gpioInit( LEDG, GPIO_OUTPUT );
-      gpioInit( LEDB, GPIO_OUTPUT );
-      gpioInit( LED1, GPIO_OUTPUT );
-      gpioInit( LED2, GPIO_OUTPUT );
-      gpioInit( LED3, GPIO_OUTPUT );
-
-      //#error EDU-CIAA-NXP
-
-   #elif BOARD==ciaa_z3r0
-      #error CIAA-Z3R0
-
-   #elif BOARD==pico_ciaa
-      #error PicoCIAA
-
-   #else
-      #error BOARD compile variable must be defined
-
-   #endif
-
+    /* SysTick_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 /*==================[end of file]============================================*/
