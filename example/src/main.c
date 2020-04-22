@@ -42,7 +42,7 @@ int main(void)
     {
     	for( i=0 ; i<sizeof(secuencia) ; i++ ) {
 			gpioToggle(secuencia[i]);
-			HAL_Delay(100);
+			delay(100);
 		}
     }
 }
