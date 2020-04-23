@@ -1,6 +1,6 @@
-# sAPI for bluepill
+# sAPI for Blue Pill
 
-Port from sAPI library to STM32F103C8 bluepill board.
+Port from sAPI library to STM32F103C8T6 [Blue Pill board](https://stm32-base.org/boards/STM32F103C8T6-Blue-Pill.html).
 
 sAPI is a simple API that acts as a HAL (Hardware Abstraction Layer) for microcontrollers used in the [project CIAA](http://www.proyecto-ciaa.com.ar/).
 
