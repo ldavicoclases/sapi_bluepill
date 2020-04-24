@@ -108,6 +108,7 @@ void SystemClock_Config(void)
 {
    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
    /** Initializes the CPU, AHB and APB busses clocks
    */
@@ -130,6 +131,13 @@ void SystemClock_Config(void)
    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+
+   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC
+                                       |RCC_PERIPHCLK_USB;
+   PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
+   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
+   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 }
 
 /*==================[end of file]============================================*/
