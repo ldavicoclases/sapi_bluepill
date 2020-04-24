@@ -560,13 +560,47 @@ void uartInit( uartMap_t uart, uint32_t baudRate )
 // Read 1 byte from RX FIFO, check first if exist aviable data
 bool_t uartReadByte( uartMap_t uart, uint8_t* receivedByte )
 {
-   bool_t retVal = TRUE;
-   if( HAL_UART_Receive( stmUarts[uart].uart, receivedByte, 1, 1) == HAL_OK ) {
-      retVal = TRUE;
-   } else {
-      retVal = FALSE;
-   }
-   return retVal;
+    uint16_t *tmp;
+    bool_t retVal = FALSE;
+    UART_HandleTypeDef *huart;
+
+    huart = stmUarts[uart].uart;
+
+    /* Check that a Rx process is not already ongoing */
+    if (huart->RxState == HAL_UART_STATE_READY && receivedByte != NULL) {
+
+       /* Process Locked */
+       __HAL_LOCK(huart);
+
+       huart->ErrorCode = HAL_UART_ERROR_NONE;
+       huart->RxState = HAL_UART_STATE_BUSY_RX;
+
+       if(__HAL_UART_GET_FLAG(huart, UART_FLAG_RXNE) == SET) {
+          if (huart->Init.WordLength == UART_WORDLENGTH_9B) {
+             tmp = (uint16_t *) receivedByte;
+             if (huart->Init.Parity == UART_PARITY_NONE) {
+                *tmp = (uint16_t)(huart->Instance->DR & (uint16_t)0x01FF);
+             } else {
+                *tmp = (uint16_t)(huart->Instance->DR & (uint16_t)0x00FF);
+             }
+          } else {
+             if (huart->Init.Parity == UART_PARITY_NONE) {
+                *receivedByte = (uint8_t)(huart->Instance->DR & (uint8_t)0x00FF);
+             } else {
+                *receivedByte = (uint8_t)(huart->Instance->DR & (uint8_t)0x007F);
+             }
+          }
+          retVal = TRUE;
+       }
+
+       /* At end of Rx process, restore huart->RxState to Ready */
+       huart->RxState = HAL_UART_STATE_READY;
+
+       /* Process Unlocked */
+       __HAL_UNLOCK(huart);
+    }
+
+    return retVal;
 }
 
 // Blocking Write 1 byte to TX FIFO
