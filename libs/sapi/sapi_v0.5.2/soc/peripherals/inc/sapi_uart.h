@@ -153,11 +153,8 @@ void uartClearPendingInterrupt(uartMap_t uart);
 
 /*==================[ISR external functions declaration]======================*/
 
-/* 0x28 0x000000A0 - Handler for ISR UART0 (IRQ 24) */
 void UART1_IRQHandler(void);
-/* 0x2a 0x000000A8 - Handler for ISR UART2 (IRQ 26) */
 void UART2_IRQHandler(void);
-/* 0x2b 0x000000AC - Handler for ISR UART3 (IRQ 27) */
 void UART3_IRQHandler(void);
 
 #endif /* SAPI_USE_INTERRUPTS */

@@ -649,6 +649,7 @@ void UART3_IRQHandler(void)
 {
    uartProcessIRQ( UART_3 );
 }
+
 #endif /* SAPI_USE_INTERRUPTS */
 
 /*==================[end of file]============================================*/
