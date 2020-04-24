@@ -86,7 +86,6 @@ typedef struct{
                 int8_t mode;
                 int8_t pull;
                 int8_t speed;
-                int8_t alternate;
 } pinInitGpioStm32f1xx_t;
 
 /* ------ End Pin Init Structs STM32F1xx ------- */
