@@ -33,7 +33,7 @@
   */
   
 #define HAL_MODULE_ENABLED  
-  /*#define HAL_ADC_MODULE_ENABLED   */
+/*#define HAL_ADC_MODULE_ENABLED   */
 /*#define HAL_CRYP_MODULE_ENABLED   */
 /*#define HAL_CAN_MODULE_ENABLED   */
 /*#define HAL_CAN_LEGACY_MODULE_ENABLED   */
@@ -75,6 +75,7 @@
 #define HAL_GPIO_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
+#define HAL_UART_MODULE_ENABLED
 
 /* ########################## Oscillator Values adaptation ####################*/
 /**

@@ -53,27 +53,6 @@ extern "C" {
 /*==================[typedef]================================================*/
 
 typedef enum{
-   UART_PARITY_NONE = 0,
-   UART_PARITY_ODD = 0,
-   UART_PARITY_EVEN,
-} uartParity_t;
-
-typedef enum{
-   UART_STOP_BITS_1 = 1,
-   UART_STOP_BITS_2 = 2,
-   UART_STOP_BITS_1_5 = 3,
-} uartStopBits_t;
-
-typedef enum{
-   UART_DATA_BITS_5 = 5,
-   UART_DATA_BITS_6 = 6,
-   UART_DATA_BITS_7 = 7,
-   UART_DATA_BITS_8 = 8,
-   UART_DATA_BITS_9 = 9,
-} uartDataBits_t;
-
-
-typedef enum{
    UART_RECEIVE_STRING_CONFIG,
    UART_RECEIVE_STRING_RECEIVING,
    UART_RECEIVE_STRING_RECEIVED_OK,
@@ -132,25 +111,15 @@ bool_t receiveBytesUntilReceiveStringOrTimeoutBlocking(
    tick_t timeout );
 
 //-------------------------------------------------------------
-
-// Return TRUE if have unread data in RX FIFO
-bool_t uartRxReady( uartMap_t uart );
-// Return TRUE if have space in TX FIFO
-bool_t uartTxReady( uartMap_t uart );
-// Read from RX FIFO
-uint8_t uartRxRead( uartMap_t uart );
-// Write in TX FIFO
-void uartTxWrite( uartMap_t uart, uint8_t value );
-
-//-------------------------------------------------------------
 // UART Initialization
 void uartInit( uartMap_t uart, uint32_t baudRate );
 
-void uartInit2( uartMap_t uart, uint32_t baudRate, 
-                uint8_t dataBits, uint8_t parity, uint8_t stopBits );
+// TODO: Implement uartInit2()
+// void uartInit2( uartMap_t uart, uint32_t baudRate, uint8_t dataBits, uint8_t parity, uint8_t stopBits );
 
 // Read 1 byte from RX FIFO, check first if exist aviable data
 bool_t uartReadByte( uartMap_t uart, uint8_t* receivedByte );
+
 // Blocking, Write 1 byte to TX FIFO
 void uartWriteByte( uartMap_t uart, const uint8_t value );
 
@@ -185,7 +154,7 @@ void uartClearPendingInterrupt(uartMap_t uart);
 /*==================[ISR external functions declaration]======================*/
 
 /* 0x28 0x000000A0 - Handler for ISR UART0 (IRQ 24) */
-void UART0_IRQHandler(void);
+void UART1_IRQHandler(void);
 /* 0x2a 0x000000A8 - Handler for ISR UART2 (IRQ 26) */
 void UART2_IRQHandler(void);
 /* 0x2b 0x000000AC - Handler for ISR UART3 (IRQ 27) */

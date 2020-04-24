@@ -27,23 +27,39 @@
 int main(void)
 {
     uint8_t i;
-    gpioMap_t secuencia[] = {PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
-                             PA8, PA9, PA10, PA11, PA12, PA15,
-                             PB0, PB1, PB3, PB4, PB5, PB6, PB7,
+    uint8_t recibido;
+    delay_t tiempo_encendido;
+    gpioMap_t secuencia[] = {PB0, PB1, PB3, PB4, PB5, PB6, PB7,
                              PB8, PB9, PB10, PB11, PB12, PB13, PB14, PB15};
 
     boardInit();
+    delayInit( &tiempo_encendido, 500 );
+    gpioInit(PA15, GPIO_OUTPUT);
 
     for( i=0 ; i<sizeof(secuencia) ; i++ ) {
-    	gpioInit(secuencia[i], GPIO_OUTPUT);
+        gpioInit(secuencia[i], GPIO_OUTPUT);
     }
+
+    uartInit(UART_1, 9600);
+    uartInit(UART_2, 9600);
+    // uartInit(UART_3, 9600);  // No funciona en el simulador porque STM32F103C6 tiene sólo 2 UARTS
+
+    uartWriteString(UART_1, "Esta es la consola 1\n");
+    uartWriteString(UART_2, "Esta es la consola 2\n");
 
     while (1)
     {
-    	for( i=0 ; i<sizeof(secuencia) ; i++ ) {
-			gpioToggle(secuencia[i]);
-			delay(100);
-		}
+        if( delayRead( &tiempo_encendido ) ) {
+            gpioToggle(secuencia[i]);
+            i++;
+            i %= sizeof(secuencia);
+        }
+
+        if( uartReadByte(UART_1, &recibido) ) {
+            gpioToggle(PA15);
+        }
+
+        delay(1);
     }
 }
 
