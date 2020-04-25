@@ -1,5 +1,6 @@
 /* Copyright 2016, Ian Olivieri
  * Copyright 2016, Eric Pernia.
+ * Copyright 2020, Nahuel Espinosa.
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -32,7 +33,7 @@
  *
  */
 
-/* Date: 2016-02-20 */
+/* Date: 2020-04-24 */
 
 /*==================[inclusions]=============================================*/
 
@@ -41,6 +42,7 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data declaration]==============================*/
+ADC_HandleTypeDef hadc1;
 
 /*==================[internal functions declaration]=========================*/
 
@@ -53,103 +55,87 @@
 /*==================[external functions definition]==========================*/
 
 /*
- * @brief:  enable/disable the ADC and DAC peripheral
+ * @brief:  enable/disable the ADC peripheral
  * @param:  ADC_ENABLE, ADC_DISABLE
  * @return: none
 */
 void adcInit( adcInit_t config )
 {
-   /*
-   Pines ADC EDU-CIAA-NXP
-   
-               pin  func
-   ADC_CH1 ---- 2   ADC0_1/ADC1_1
-   ADC_CH2 ---- 143 ADC0_2/ADC1_2
-   ADC_CH3 ---- 139 ADC0_3/ADC1_3
-   DAC     ---- 6   ADC0_0/ADC1_0/DAC
-
-   T_FIL1  ---- 3   ADC0_1 (ANALOG_SEL)
-   T_COL2  ---- 133 ADC0_3 (ANALOG_SEL)
-
-   LCD1    ---- 9   DAC (ANALOG_SEL)
-
-   T_FIL3  ---- 7   ADC0_0 (ANALOG_SEL)
-   T_COL1  ---- 132 ADC0_4 (ANALOG_SEL)
-   ENET_MDC --- 140 ADC1_6 (ANALOG_SEL)
-   */
+   GPIO_InitTypeDef GPIO_InitStruct = {0};
    
    switch(config) {
 
-      case ADC_ENABLE: {
+      case ADC_ENABLE:
+         /* Enable ADC peripheral */
+         __HAL_RCC_ADC1_CLK_ENABLE();
+         __HAL_RCC_GPIOA_CLK_ENABLE();
 
-         /* Config ADC0 sample mode */      
-         ADC_CLOCK_SETUP_T ADCSetup = {
-            ADC_MAX_SAMPLE_RATE,   // ADC Sample rate:ADC_MAX_SAMPLE_RATE = 400KHz
-            10,                    // ADC resolution: ADC_10BITS = 10
-            0                      // ADC Burst Mode: (true or false)
-         };
+         hadc1.Instance = ADC1;
+         hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+         hadc1.Init.ContinuousConvMode = DISABLE;
+         hadc1.Init.DiscontinuousConvMode = DISABLE;
+         hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+         hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+         hadc1.Init.NbrOfConversion = 1;
 
-         Chip_ADC_Init( LPC_ADC0, &ADCSetup );
-         /* Disable burst mode */
-         Chip_ADC_SetBurstCmd( LPC_ADC0, DISABLE );
-         /* Set sample rate to 200KHz */
-         Chip_ADC_SetSampleRate( LPC_ADC0, &ADCSetup, ADC_MAX_SAMPLE_RATE/2 );
-         /* Disable all channels */
-         Chip_ADC_EnableChannel( LPC_ADC0, ADC_CH1, DISABLE );
-         Chip_ADC_Int_SetChannelCmd( LPC_ADC0, ADC_CH1, DISABLE );
+         HAL_ADC_Init(&hadc1);
 
-         Chip_ADC_EnableChannel( LPC_ADC0, ADC_CH2, DISABLE );
-         Chip_ADC_Int_SetChannelCmd( LPC_ADC0, ADC_CH2, DISABLE );
-
-         Chip_ADC_EnableChannel( LPC_ADC0, ADC_CH3, DISABLE );
-         Chip_ADC_Int_SetChannelCmd( LPC_ADC0, ADC_CH3, DISABLE );
-
-         Chip_ADC_EnableChannel( LPC_ADC0, ADC_CH4, DISABLE );
-         Chip_ADC_Int_SetChannelCmd( LPC_ADC0, ADC_CH4, DISABLE );
-
-         // For aditional ADC Inputs (Pablo Gomez)
-         #if BOARD==edu_ciaa_nxp
-         Chip_SCU_ADC_Channel_Config( 0, 4 );                      // Revisar codigo
-         Chip_ADC_Int_SetChannelCmd( LPC_ADC0, ADC_CH5, DISABLE ); // Revisar codigo
-         #endif
-      }
-      break;
+         /* Configure pins */
+         GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+         break;
 
       case ADC_DISABLE:
          /* Disable ADC peripheral */
-         Chip_ADC_DeInit( LPC_ADC0 );
+         __HAL_RCC_ADC1_CLK_DISABLE();
+         HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+
          break;
       }
-
 }
 
 
 /*
  * @brief   Get the value of one ADC channel. Mode: BLOCKING
- * @param   AI0 ... AIn
+ * @param   CH0 ... CHn
  * @return  analog value
  */
 uint16_t adcRead( adcMap_t analogInput )
 {
-   uint8_t lpcAdcChannel = analogInput + 1;
+   ADC_ChannelConfTypeDef sConfig;
    uint16_t analogValue = 0;
 
+   switch(analogInput) {
+      case CH0:
+         sConfig.Channel = ADC_CHANNEL_0;
+         break;
+      case CH1:
+         sConfig.Channel = ADC_CHANNEL_1;
+         break;
+      case CH2:
+         sConfig.Channel = ADC_CHANNEL_2;
+         break;
+      case CH3:
+         sConfig.Channel = ADC_CHANNEL_3;
+         break;
+   }
+
    // Enable channel
-   Chip_ADC_EnableChannel(LPC_ADC0, lpcAdcChannel, ENABLE);
+   sConfig.Rank = ADC_REGULAR_RANK_1;
+   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 
    // Start conversion
-   Chip_ADC_SetStartMode(LPC_ADC0, ADC_START_NOW, ADC_TRIGGERMODE_RISING);
+   HAL_ADC_Start(&hadc1);
 
    // Wait for conversion complete
-   while(
-      (Chip_ADC_ReadStatus(LPC_ADC0, lpcAdcChannel, ADC_DR_DONE_STAT) != SET)
-   );
+   if( HAL_ADC_PollForConversion(&hadc1, 200) == HAL_OK ) {
+      analogValue = HAL_ADC_GetValue(&hadc1);
+   }
 
-   // Enable Read value
-   Chip_ADC_ReadValue( LPC_ADC0, lpcAdcChannel, &analogValue );
-
-   // Disable channel
-   Chip_ADC_EnableChannel( LPC_ADC0, lpcAdcChannel, DISABLE );
+   // Stop conversion
+   HAL_ADC_Stop(&hadc1);
 
    return analogValue;
 }
