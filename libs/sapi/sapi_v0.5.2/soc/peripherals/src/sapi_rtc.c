@@ -1,5 +1,6 @@
 /* Copyright 2011, ChaN.
  * Copyright 2016, Eric Pernia.
+ * Copyright 2020, Nahuel Espinosa.
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -32,7 +33,7 @@
  *
  */
 
-/* Date: 2016-03-07 */
+/* Date: 2020-04-26 */
 
 /*==================[inclusions]=============================================*/
 
@@ -46,6 +47,8 @@
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
+
+RTC_HandleTypeDef hrtc;
 
 /*==================[external data definition]===============================*/
 
@@ -61,43 +64,18 @@
 bool_t rtcInit( void )
 {
    bool_t ret_val = 1;
-/*
-   static bool_t init;
 
-   if( init ){
-      // Already initialized
-      ret_val = 0;
-   } else {
-*/
-      /* RTC Block section ------------------------- */
-      Chip_RTC_Init(LPC_RTC);
-
-      /* Set current time for RTC */
-      /* Current time is 22:00:00 , 2016-07-02 */
+   //HAL_PWR_EnableBkUpAccess();
+   /* Enable BKP CLK enable for backup registers */
+   //__HAL_RCC_BKP_CLK_ENABLE();
+   /* RTC clock enable */
+   __HAL_RCC_RTC_ENABLE();
    
-   /*
-      RTC_TIME_T rtcTime;
-      rtcTime.time[RTC_TIMETYPE_SECOND]     = 0;
-      rtcTime.time[RTC_TIMETYPE_MINUTE]     = 0;
-      rtcTime.time[RTC_TIMETYPE_HOUR]       = 0;
-      rtcTime.time[RTC_TIMETYPE_DAYOFWEEK]  = 0;
-      rtcTime.time[RTC_TIMETYPE_DAYOFMONTH] = 0;
-      rtcTime.time[RTC_TIMETYPE_MONTH]      = 0;
-      rtcTime.time[RTC_TIMETYPE_YEAR]       = 0;
-      Chip_RTC_SetFullTime(LPC_RTC, &rtcTime);
-      */
+   hrtc.Instance = RTC;
+   hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
+   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_NONE;
 
-
-      //rtcWrite( rtc );
-
-      /* Enable rtc (starts increase the tick counter
-         and second counter register) */
-      Chip_RTC_Enable(LPC_RTC, ENABLE);
-      
-      delay(2100);
-
-      //init = 1;
-   //}
+   HAL_RTC_Init(&hrtc);
 
    return ret_val;
 }
@@ -111,17 +89,19 @@ bool_t rtcRead( rtc_t * rtc )
 {
    bool_t ret_val = 1;
 
-   RTC_TIME_T rtcTime;
+   RTC_TimeTypeDef rtcTime;
+   RTC_DateTypeDef rtcDate;
 
-   Chip_RTC_GetFullTime(LPC_RTC, &rtcTime);
+   HAL_RTC_GetTime(&hrtc, &rtcTime, RTC_FORMAT_BIN);
+   HAL_RTC_GetDate(&hrtc, &rtcDate, RTC_FORMAT_BIN);
 
-   rtc->sec = rtcTime.time[RTC_TIMETYPE_SECOND];
-   rtc->min = rtcTime.time[RTC_TIMETYPE_MINUTE];
-   rtc->hour = rtcTime.time[RTC_TIMETYPE_HOUR];
-   rtc->wday = rtcTime.time[RTC_TIMETYPE_DAYOFWEEK];
-   rtc->mday = rtcTime.time[RTC_TIMETYPE_DAYOFMONTH];
-   rtc->month = rtcTime.time[RTC_TIMETYPE_MONTH];
-   rtc->year = rtcTime.time[RTC_TIMETYPE_YEAR];
+   rtc->sec   = rtcTime.Seconds;
+   rtc->min   = rtcTime.Minutes;
+   rtc->hour  = rtcTime.Hours;
+   rtc->wday  = rtcDate.WeekDay;
+   rtc->mday  = rtcDate.Date;
+   rtc->month = rtcDate.Month;
+   rtc->year  = rtcDate.Year;
 
    return ret_val;
 }
@@ -135,17 +115,19 @@ bool_t rtcWrite( rtc_t * rtc )
 {
    bool_t ret_val = 1;
 
-   RTC_TIME_T rtcTime;
+   RTC_TimeTypeDef rtcTime;
+   RTC_DateTypeDef rtcDate;
 
-   rtcTime.time[RTC_TIMETYPE_SECOND]     = rtc->sec;
-   rtcTime.time[RTC_TIMETYPE_MINUTE]     = rtc->min;
-   rtcTime.time[RTC_TIMETYPE_HOUR]       = rtc->hour;
-   rtcTime.time[RTC_TIMETYPE_DAYOFWEEK]  = rtc->wday;
-   rtcTime.time[RTC_TIMETYPE_DAYOFMONTH] = rtc->mday;
-   rtcTime.time[RTC_TIMETYPE_MONTH]      = rtc->month;
-   rtcTime.time[RTC_TIMETYPE_YEAR]	     = rtc->year;
+   rtcTime.Seconds = rtc->sec;
+   rtcTime.Minutes = rtc->min;
+   rtcTime.Hours   = rtc->hour;
+   rtcDate.WeekDay = rtc->wday;
+   rtcDate.Date    = rtc->mday;
+   rtcDate.Month   = rtc->month;
+   rtcDate.Year    = rtc->year % 100;
 
-   Chip_RTC_SetFullTime(LPC_RTC, &rtcTime);
+   HAL_RTC_SetTime(&hrtc, &rtcTime, RTC_FORMAT_BIN);
+   HAL_RTC_SetDate(&hrtc, &rtcDate, RTC_FORMAT_BIN);
 
    return ret_val;
 }

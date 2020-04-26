@@ -77,6 +77,7 @@
 #define HAL_RCC_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
 #define HAL_ADC_MODULE_ENABLED
+#define HAL_RTC_MODULE_ENABLED
 
 /* ########################## Oscillator Values adaptation ####################*/
 /**

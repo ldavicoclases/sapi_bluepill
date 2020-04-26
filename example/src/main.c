@@ -31,8 +31,21 @@ int main(void)
     delay_t tiempo_encendido, tiempo_conversion;
     gpioMap_t secuencia[] = {PB0, PB1, PB3, PB4, PB5, PB6, PB7,
                              PB8, PB9, PB10, PB11, PB12, PB13, PB14, PB15};
+    char time_string[] = "HH:MM:SS";
+    rtc_t init_time, current_time;
+
+    init_time.hour = 20;
+    init_time.min = 6;
+    init_time.sec= 0;
+    init_time.mday = 26;
+    init_time.month = 4;
+    init_time.year = 2020;
 
     boardInit();
+    rtcInit();
+
+    rtcWrite(&init_time);
+
     delayInit(&tiempo_encendido, 500);
     delayInit(&tiempo_conversion, 50);
 
@@ -57,10 +70,17 @@ int main(void)
             gpioToggle(secuencia[i]);
             i++;
             i %= sizeof(secuencia);
+
+            rtcRead(&current_time);
+
+            uartWriteString(UART_1, hourMinSecToStringHHMMSS(current_time.hour, current_time.min, current_time.sec, time_string));
+            uartWriteString(UART_1, "\r\n");
         }
 
         if( delayRead(&tiempo_conversion) ) {
+            uartWriteString(UART_1, "ADC0: ");
             uartWriteByte(UART_1, adcRead(CH0) / 1024 + '0');
+            uartWriteString(UART_1, "\r\n");
         }
 
         if( uartReadByte(UART_1, &recibido) ) {
