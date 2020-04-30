@@ -1,6 +1,7 @@
 # IDE local files
 .mxproject
 .settings
+*.launch
 
 # Output files
 debug/
