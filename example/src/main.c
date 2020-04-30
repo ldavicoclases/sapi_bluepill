@@ -50,6 +50,7 @@ int main(void)
     delayInit(&tiempo_conversion, 50);
 
     gpioInit(PA15, GPIO_OUTPUT);
+    gpioInit(PC13, GPIO_OUTPUT);
 
     for( i=0 ; i<sizeof(secuencia) ; i++ ) {
         gpioInit(secuencia[i], GPIO_OUTPUT);
@@ -63,10 +64,12 @@ int main(void)
 
     uartWriteString(UART_1, "Esta es la consola 1\r\n");
     // uartWriteString(UART_2, "Esta es la consola 2\r\n");
+    i = 0;
 
     while (1)
     {
         if( delayRead(&tiempo_encendido) ) {
+            gpioToggle(PC13);
             gpioToggle(secuencia[i]);
             i++;
             i %= sizeof(secuencia);
