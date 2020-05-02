@@ -65,9 +65,9 @@ bool_t rtcInit( void )
 {
    bool_t ret_val = 1;
 
-   //HAL_PWR_EnableBkUpAccess();
+   HAL_PWR_EnableBkUpAccess();
    /* Enable BKP CLK enable for backup registers */
-   //__HAL_RCC_BKP_CLK_ENABLE();
+   __HAL_RCC_BKP_CLK_ENABLE();
    /* RTC clock enable */
    __HAL_RCC_RTC_ENABLE();
    
