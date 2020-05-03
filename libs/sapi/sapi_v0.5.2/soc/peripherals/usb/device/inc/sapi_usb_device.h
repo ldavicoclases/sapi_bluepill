@@ -37,7 +37,6 @@
 #include "sapi_datatypes.h"
 
 // Devices
-#include "usbd_keyboard.h"
 #include "cdc_uart.h"
 
 /*==================[c++]====================================================*/
