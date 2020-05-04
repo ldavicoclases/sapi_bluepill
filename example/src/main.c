@@ -44,7 +44,7 @@ int main(void)
     boardInit();
     rtcInit();
 
-    rtcWrite(&init_time);
+    // rtcWrite(&init_time);
 
     delayInit(&tiempo_encendido, 500);
     delayInit(&tiempo_conversion, 50);
@@ -59,6 +59,7 @@ int main(void)
     uartInit(UART_1, 9600);
     // uartInit(UART_2, 9600);  // No se puede usar con las entradas ADC
     // uartInit(UART_3, 9600);  // No funciona en el simulador porque STM32F103C6 tiene sólo 2 UARTS
+    cdcUartInit(9600);
 
     adcInit(ADC_ENABLE);
 
@@ -78,6 +79,10 @@ int main(void)
 
             uartWriteString(UART_1, hourMinSecToStringHHMMSS(current_time.hour, current_time.min, current_time.sec, time_string));
             uartWriteString(UART_1, "\r\n");
+        }
+
+        if( cdcUartReadByte(&recibido) ) {
+            cdcUartWriteByte(recibido);     // uart echo
         }
 
         if( delayRead(&tiempo_conversion) ) {
