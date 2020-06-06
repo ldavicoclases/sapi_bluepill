@@ -42,6 +42,9 @@ int main(void)
     init_time.year = 2020;
 
     boardInit();
+
+    pwmInit(TIM4_CH3,PWM_ENABLE);
+    pwmInit(TIM4_CH3,PWM_ENABLE_OUTPUT);
     rtcInit();
 
     // rtcWrite(&init_time);
@@ -52,51 +55,51 @@ int main(void)
     gpioInit(PA15, GPIO_OUTPUT);
     gpioInit(PC13, GPIO_OUTPUT);
 
-    for( i=0 ; i<sizeof(secuencia) ; i++ ) {
-        gpioInit(secuencia[i], GPIO_OUTPUT);
-    }
+//    for( i=0 ; i<sizeof(secuencia) ; i++ ) {
+//        gpioInit(secuencia[i], GPIO_OUTPUT);
+//    }
 
-    uartInit(UART_1, 9600);
+   // uartInit(UART_1, 9600);
     // uartInit(UART_2, 9600);  // No se puede usar con las entradas ADC
     // uartInit(UART_3, 9600);  // No funciona en el simulador porque STM32F103C6 tiene sólo 2 UARTS
-    cdcUartInit(9600);
+    //cdcUartInit(9600);
 
-    adcInit(ADC_ENABLE);
+    //adcInit(ADC_ENABLE);
 
-    uartWriteString(UART_1, "Esta es la consola 1\r\n");
+    //uartWriteString(UART_1, "Esta es la consola 1\r\n");
     // uartWriteString(UART_2, "Esta es la consola 2\r\n");
     i = 0;
 
     while (1)
     {
-        if( delayRead(&tiempo_encendido) ) {
-            gpioToggle(PC13);
-            gpioToggle(secuencia[i]);
-            i++;
-            i %= sizeof(secuencia);
-
-            rtcRead(&current_time);
-
-            uartWriteString(UART_1, hourMinSecToStringHHMMSS(current_time.hour, current_time.min, current_time.sec, time_string));
-            uartWriteString(UART_1, "\r\n");
-        }
-
-        if( cdcUartReadByte(&recibido) ) {
-            cdcUartWriteByte(recibido);     // uart echo
-        }
-
-        if( delayRead(&tiempo_conversion) ) {
-            uartWriteString(UART_1, "ADC0: ");
-            uartWriteByte(UART_1, adcRead(CH0) / 1024 + '0');
-            uartWriteString(UART_1, "\r\n");
-        }
-
-        if( uartReadByte(UART_1, &recibido) ) {
-            uartWriteByte(UART_1, recibido);
-            gpioToggle(PA15);
-        }
-
-        delay(1);
+//        if( delayRead(&tiempo_encendido) ) {
+//            gpioToggle(PC13);
+//            gpioToggle(secuencia[i]);
+//            i++;
+//            i %= sizeof(secuencia);
+//
+//            rtcRead(&current_time);
+//
+//            uartWriteString(UART_1, hourMinSecToStringHHMMSS(current_time.hour, current_time.min, current_time.sec, time_string));
+//            uartWriteString(UART_1, "\r\n");
+//        }
+//
+//        if( cdcUartReadByte(&recibido) ) {
+//            cdcUartWriteByte(recibido);     // uart echo
+//        }
+//
+//        if( delayRead(&tiempo_conversion) ) {
+//            uartWriteString(UART_1, "ADC0: ");
+//            uartWriteByte(UART_1, adcRead(CH0) / 1024 + '0');
+//            uartWriteString(UART_1, "\r\n");
+//        }
+//
+//        if( uartReadByte(UART_1, &recibido) ) {
+//            uartWriteByte(UART_1, recibido);
+//            gpioToggle(PA15);
+//        }
+//
+//        delay(1);
     }
 }
 
