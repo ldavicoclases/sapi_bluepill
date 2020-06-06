@@ -119,7 +119,8 @@ typedef enum {
 typedef uint8_t i2cMap_t;
 
 typedef enum {
-   SPI0
+   SPI_1,
+   SPI_2
 } spiMap_t;
 
 /*==================[c++]====================================================*/
