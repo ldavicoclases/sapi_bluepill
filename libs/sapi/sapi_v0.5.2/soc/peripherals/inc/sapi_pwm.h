@@ -50,6 +50,17 @@ extern "C" {
 
 #define pwmConfig pwmInit
 
+#define PWM_T1FREC          10000 /* 10Khz */      /*MIN FREC 733Hz */
+#define PWM_T2FREC          5000 /* 5000hz */
+#define PWM_T3FREC          2500 /* 2500hz */
+#define PWM_T4FREC          1000 /* 1000hz */
+//#define PWM_PERIOD        1000 /* 1000uS = 1ms*/
+
+#define PWM_T1PERIOD          ((48*1000000U)/PWM_T1FREC)
+#define PWM_T2PERIOD          ((48*1000000U)/PWM_T2FREC)
+#define PWM_T3PERIOD          ((48*1000000U)/PWM_T3FREC)
+#define PWM_T4PERIOD          ((48*1000000U)/PWM_T4FREC)
+
 /*==================[typedef]================================================*/
 
 typedef enum{

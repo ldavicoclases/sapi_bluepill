@@ -52,16 +52,7 @@
 
 #define PWM_TOTALNUMBER   16   /* 4 canales de 4 timers */
 
-#define PWM_T1FREC          10000 /* 1Khz */      /*MIN FREC 733Hz */
-#define PWM_T2FREC          5000 /* 500hz */
-#define PWM_T3FREC          2500 /* 250hz */
-#define PWM_T4FREC          1000 /* 100hz */
-//#define PWM_PERIOD        1000 /* 1000uS = 1ms*/
 
-#define PWM_T1PERIOD          ((48*1000000U)/PWM_T1FREC)
-#define PWM_T2PERIOD          ((48*1000000U)/PWM_T2FREC)
-#define PWM_T3PERIOD          ((48*1000000U)/PWM_T3FREC)
-#define PWM_T4PERIOD          ((48*1000000U)/PWM_T4FREC)
 
 
 /*==================[internal data declaration]==============================*/
@@ -374,11 +365,18 @@ bool_t pwmInit( pwmMap_t pwmNumber, pwmInit_t config)
 {
 
    bool_t ret_val = 1;
+   uint8_t pwmFind;
 
    switch(config) {
 
    case PWM_ENABLE:
+	  for(pwmFind=(pwmNumber%NUMBER_OF_TIMERS);pwmFind<PWM_TOTALNUMBER;pwmFind+=4){
+		  if(pwmIsAttached(pwmFind ))
+			  break;
+	  }// me fijo si el timer ya esta iniciado (me ahorro iniciarlo mas de una vez)
+	  if(pwmFind>=PWM_TOTALNUMBER){
       pwmInitTimers(pwmNumber);
+	  }
       break;
 
    case PWM_DISABLE:

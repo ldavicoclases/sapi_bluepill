@@ -71,6 +71,8 @@ int main(void)
 
     pwmInit(TIM1_CH1,PWM_ENABLE);
     pwmInit(TIM1_CH1,PWM_ENABLE_OUTPUT); //PA8
+    pwmInit(TIM1_CH3,PWM_ENABLE);
+    pwmInit(TIM1_CH3,PWM_ENABLE_OUTPUT); //PA8
     pwmWrite(TIM1_CH1,191); //75% de ciclo de actividad
     if(pwmRead(TIM1_CH1, &value)){
     	if (value == 191){
