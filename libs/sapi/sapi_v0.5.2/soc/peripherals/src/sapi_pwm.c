@@ -297,46 +297,55 @@ static bool_t pwmDetach( pwmMap_t pwmNumber )
 //
 ///*
 // * @brief:   change the value of the pwm at the selected pin
-// * @param:   pwmNumber:   ID of the pwm, from 0 to 10
+// * @param:   pwmNumber:   ID of the pwm, from 0 to 15
 // * @param:   value:   8bit value, from 0 to 255
 // * @return:   True if the value was successfully changed, False if not.
 // */
-//bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
-//{
-//
-//   bool_t success = FALSE;
-//   uint8_t position = 0;
-//
-//   position = pwmIsAttached(pwmNumber);
-//
-//   if(position) {
+bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
+{
+   TIM_HandleTypeDef* aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+   bool_t success = FALSE;
+   uint8_t position = 0;
+   uint16_t pwmPeriod = ((uint16_t)aux->Init.Period*value)/255;
+
+   position = pwmIsAttached(pwmNumber);
+
+   if(position) {
 //      Sct_SetDutyCycle(pwmMap[pwmNumber], value);
-//      success = TRUE;
-//   }
-//
-//   return success;
-//}
+	   __HAL_TIM_SET_COMPARE(aux, channel[pwmNumber/NUMBER_OF_TIMERS], pwmPeriod);
+      success = TRUE;
+   }
+
+   return success;
+}
 //
 ///*
 // * @brief:   read the value of the pwm in the pin
-// * @param:   pwmNumber:   ID of the pwm, from 0 to 10
+// * @param:   pwmNumber:   ID of the pwm, from 0 to 15
 // * @return:   value of the pwm in the pin (0 ~ 255).
 // *   If an error ocurred, return = EMPTY_POSITION = 255
 // */
-//uint8_t pwmRead( pwmMap_t pwmNumber )
-//{
-//
-//   uint8_t position = 0, value = 0;
-//   position = pwmIsAttached(pwmNumber);
-//
-//   if(position) {
-//      value = Sct_GetDutyCycle(pwmMap[pwmNumber]);
-//   } else {
-//      value = EMPTY_POSITION;
-//   }
-//
-//   return value;
-//}
+uint8_t pwmRead( pwmMap_t pwmNumber )
+{
+   TIM_HandleTypeDef* aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+   uint8_t position = 0;
+   position = pwmIsAttached(pwmNumber);
+   uint16_t pwmPeriod = (uint16_t)aux->Init.Period;
+   uint32_t value=0;
+
+   if(position) {
+     // value = Sct_GetDutyCycle(pwmMap[pwmNumber]);
+	value= (__HAL_TIM_GET_COMPARE(aux, channel[pwmNumber/NUMBER_OF_TIMERS]));
+	value*=255;
+	value/=pwmPeriod;
+	if(value)
+		value++;// por redondeo siempre devuelve una unidad menos (si el perido es otro esto cambia, debiera revisar)
+   } else {
+      value = EMPTY_POSITION;
+   }
+
+   return (uint8_t)value;
+}
 //
 //
 ///*

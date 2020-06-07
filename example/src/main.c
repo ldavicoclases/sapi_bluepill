@@ -45,6 +45,8 @@ int main(void)
 
     pwmInit(TIM4_CH3,PWM_ENABLE);
     pwmInit(TIM4_CH3,PWM_ENABLE_OUTPUT);
+    pwmWrite(TIM4_CH3,70);
+    uint8_t value = pwmRead(TIM4_CH3);
     rtcInit();
 
     // rtcWrite(&init_time);
