@@ -52,10 +52,17 @@
 
 #define PWM_TOTALNUMBER   16   /* 4 canales de 4 timers */
 
-#define PWM_FREC          1000 /* 1Khz */
-#define PWM_PERIOD        1000 /* 1000uS = 1ms*/
+#define PWM_T1FREC          10000 /* 1Khz */      /*MIN FREC 733Hz */
+#define PWM_T2FREC          5000 /* 500hz */
+#define PWM_T3FREC          2500 /* 250hz */
+#define PWM_T4FREC          1000 /* 100hz */
+//#define PWM_PERIOD        1000 /* 1000uS = 1ms*/
 
-#define TIMERS_TOTALNUMBER 4 //4 timers
+#define PWM_T1PERIOD          ((48*1000000U)/PWM_T1FREC)
+#define PWM_T2PERIOD          ((48*1000000U)/PWM_T2FREC)
+#define PWM_T3PERIOD          ((48*1000000U)/PWM_T3FREC)
+#define PWM_T4PERIOD          ((48*1000000U)/PWM_T4FREC)
+
 
 /*==================[internal data declaration]==============================*/
 
@@ -76,34 +83,34 @@ static const timerStmInit_t stmTimers[] = {
 // { timerAddr, { {ch1Port, ch1pin}, ch1mode }, { {ch2Port, ch2pin}, ch2mode },  { {ch3Port, ch3pin}, ch3mode }, { {ch4Port, ch4pin}, ch4mode } },
    {
       &htimer1,
-      {{GPIOA, GPIO_PIN_8 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-      {{GPIOA, GPIO_PIN_9}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOA, GPIO_PIN_10}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
+      {{GPIOA, GPIO_PIN_8 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+      {{GPIOA, GPIO_PIN_9}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOA, GPIO_PIN_10}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOA, GPIO_PIN_11}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 
    },
    {
       &htimer2,
-      {{GPIOA, GPIO_PIN_0 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-      {{GPIOA, GPIO_PIN_1}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOA, GPIO_PIN_2}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOA, GPIO_PIN_3}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
+      {{GPIOA, GPIO_PIN_0 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+      {{GPIOA, GPIO_PIN_1}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOA, GPIO_PIN_2}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOA, GPIO_PIN_3}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 
    },
    {
       &htimer3,
-      {{GPIOA, GPIO_PIN_6 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-      {{GPIOA, GPIO_PIN_7}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOB, GPIO_PIN_0}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOB, GPIO_PIN_1}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
+      {{GPIOA, GPIO_PIN_6 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+      {{GPIOA, GPIO_PIN_7}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOB, GPIO_PIN_0}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOB, GPIO_PIN_1}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 
    },
    {
       &htimer4,
-      {{GPIOB, GPIO_PIN_6 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-      {{GPIOB, GPIO_PIN_7}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOB, GPIO_PIN_8}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
-	  {{GPIOB, GPIO_PIN_9}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
+      {{GPIOB, GPIO_PIN_6 }, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+      {{GPIOB, GPIO_PIN_7}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOB, GPIO_PIN_8}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  {{GPIOB, GPIO_PIN_9}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 
    },
 };
@@ -172,6 +179,11 @@ static uint8_t AttachedPWMList[PWM_TOTALNUMBER] = {
    /*8*/  EMPTY_POSITION,
    /*9*/	EMPTY_POSITION,
    /*10*/ EMPTY_POSITION,
+   /*11*/  EMPTY_POSITION,
+   /*12*/  EMPTY_POSITION,
+   /*13*/  EMPTY_POSITION,
+   /*14*/	EMPTY_POSITION,
+   /*15*/ EMPTY_POSITION
 };
 //
 ///*==================[internal functions definition]==========================*/
@@ -194,7 +206,8 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM1_CH2:
 		case TIM1_CH3:
 		case TIM1_CH4:
-			aux->Instance= TIM1;
+			 aux->Instance= TIM1;
+			 aux->Init.Period =PWM_T1PERIOD;
 		   __HAL_RCC_TIM1_CLK_ENABLE();
 			break;
 		case TIM2_CH1:
@@ -202,6 +215,7 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM2_CH3:
 		case TIM2_CH4:
 			aux->Instance= TIM2;
+			 aux->Init.Period =PWM_T2PERIOD;
 		   __HAL_RCC_TIM2_CLK_ENABLE();
 			break;
 		case TIM3_CH1:
@@ -209,6 +223,7 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM3_CH3:
 		case TIM3_CH4:
 			aux->Instance= TIM3;
+			 aux->Init.Period =PWM_T3PERIOD;
 		    __HAL_RCC_TIM3_CLK_ENABLE();
 			break;
 		case TIM4_CH1:
@@ -216,13 +231,13 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM4_CH3:
 		case TIM4_CH4:
 			aux->Instance= TIM4;
+			 aux->Init.Period =PWM_T4PERIOD;
 		    __HAL_RCC_TIM4_CLK_ENABLE();
 			break;
 	}
 	  aux->Init.Prescaler = 0;
 	  aux->Init.CounterMode = TIM_COUNTERMODE_UP;
-	  aux->Init.Period = 32768; // tendria que ser en funcion de la frecuencia
-	  aux->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1; // idem
+	  aux->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	  aux->Init.RepetitionCounter = 0;
 	  aux->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
 	  if (HAL_TIM_Base_Init(aux) != HAL_OK)
@@ -325,7 +340,7 @@ bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
 // * @return:   value of the pwm in the pin (0 ~ 255).
 // *   If an error ocurred, return = EMPTY_POSITION = 255
 // */
-uint8_t pwmRead( pwmMap_t pwmNumber )
+bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv )
 {
    TIM_HandleTypeDef* aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
    uint8_t position = 0;
@@ -339,12 +354,13 @@ uint8_t pwmRead( pwmMap_t pwmNumber )
 	value*=255;
 	value/=pwmPeriod;
 	if(value)
-		value++;// por redondeo siempre devuelve una unidad menos (si el perido es otro esto cambia, debiera revisar)
+		value++;// por redondeo siempre devuelve una unidad menos
+	*rv = (uint8_t)value;
    } else {
-      value = EMPTY_POSITION;
+      return FALSE;
    }
 
-   return (uint8_t)value;
+   return TRUE;
 }
 //
 //
@@ -417,16 +433,13 @@ bool_t EnablePwmfor(pwmMap_t pwmNumber){
 		aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
 
 		  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-		  sConfigOC.Pulse = 16384;  // arranca en la mitad de ciclo de actividad
+
 		  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 		  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
 		  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 		  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
 		  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-		  if (HAL_TIM_PWM_ConfigChannel(aux, &sConfigOC, channel[pwmNumber/NUMBER_OF_TIMERS]) != HAL_OK)
-		  {
-		    Error_Handler();
-		  }
+
 		  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
 		  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
 		  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
@@ -440,18 +453,27 @@ bool_t EnablePwmfor(pwmMap_t pwmNumber){
 		  }
 
 
-		  if(aux->Instance==TIM1)
+		  if(aux->Instance==TIM1){
+			  sConfigOC.Pulse =PWM_T1PERIOD/2;  // arranca en la mitad de ciclo de actividad
 			  __HAL_RCC_GPIOA_CLK_ENABLE();
-
-		  if(aux->Instance==TIM2)
+		  }
+		  if(aux->Instance==TIM2){
+			  sConfigOC.Pulse =PWM_T2PERIOD/2;
 			  __HAL_RCC_GPIOA_CLK_ENABLE();
+		  }
 		  if(aux->Instance==TIM3){
+			  sConfigOC.Pulse =PWM_T3PERIOD/2;
 			  __HAL_RCC_GPIOA_CLK_ENABLE();
 			  __HAL_RCC_GPIOB_CLK_ENABLE();
 		  }
-		  if(aux->Instance==TIM4)
-			  __HAL_RCC_GPIOB_CLK_ENABLE();
-
+		  if(aux->Instance==TIM4){
+			sConfigOC.Pulse =PWM_T4PERIOD/2;
+			__HAL_RCC_GPIOB_CLK_ENABLE();
+		  }
+		  if (HAL_TIM_PWM_ConfigChannel(aux, &sConfigOC, channel[pwmNumber/NUMBER_OF_TIMERS]) != HAL_OK)
+		  {
+		    Error_Handler();
+		  }
 
 		  switch(pwmNumber){
 

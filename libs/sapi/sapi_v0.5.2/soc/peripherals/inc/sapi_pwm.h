@@ -80,7 +80,7 @@ uint8_t pwmIsAttached( pwmMap_t pwmNumber );
  * @return:   value of the pwm in the pin (0 ~ 255).
  *   If an error ocurred, return = EMPTY_POSITION = 255
  */
-uint8_t pwmRead( pwmMap_t pwmNumber );
+bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv );
 
 /*
  * @brief:   change the value of the pwm at the selected pin
