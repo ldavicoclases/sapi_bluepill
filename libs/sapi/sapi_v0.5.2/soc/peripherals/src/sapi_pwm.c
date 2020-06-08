@@ -63,6 +63,7 @@ typedef struct{
    pinInitGpioStm32f1xx_t   pwmCh2Pin;
    pinInitGpioStm32f1xx_t   pwmCh3Pin;
    pinInitGpioStm32f1xx_t   pwmCh4Pin;
+   bool_t					configured;
 } timerStmInit_t;
 
 TIM_HandleTypeDef htimer1;
@@ -70,7 +71,7 @@ TIM_HandleTypeDef htimer2;
 TIM_HandleTypeDef htimer3;
 TIM_HandleTypeDef htimer4;
 
-static const timerStmInit_t stmTimers[] = {
+static timerStmInit_t stmTimers[] = {
 // { timerAddr, { {ch1Port, ch1pin}, ch1mode }, { {ch2Port, ch2pin}, ch2mode },  { {ch3Port, ch3pin}, ch3mode }, { {ch4Port, ch4pin}, ch4mode } },
    {
       &htimer1,
@@ -78,6 +79,7 @@ static const timerStmInit_t stmTimers[] = {
       {{GPIOA, GPIO_PIN_9}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOA, GPIO_PIN_10}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOA, GPIO_PIN_11}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
+	  FALSE,
 
    },
    {
@@ -86,7 +88,7 @@ static const timerStmInit_t stmTimers[] = {
       {{GPIOA, GPIO_PIN_1}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOA, GPIO_PIN_2}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOA, GPIO_PIN_3}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
-
+	  FALSE,
    },
    {
       &htimer3,
@@ -94,7 +96,7 @@ static const timerStmInit_t stmTimers[] = {
       {{GPIOA, GPIO_PIN_7}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOB, GPIO_PIN_0}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOB, GPIO_PIN_1}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
-
+	  FALSE,
    },
    {
       &htimer4,
@@ -102,7 +104,7 @@ static const timerStmInit_t stmTimers[] = {
       {{GPIOB, GPIO_PIN_7}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOB, GPIO_PIN_8}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
 	  {{GPIOB, GPIO_PIN_9}, GPIO_MODE_AF_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW},
-
+	  FALSE,
    },
 };
 
@@ -363,19 +365,17 @@ bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv )
 // */
 bool_t pwmInit( pwmMap_t pwmNumber, pwmInit_t config)
 {
-
+   timerStmInit_t* aux = &stmTimers[pwmNumber%4];
    bool_t ret_val = 1;
-   uint8_t pwmFind;
+
 
    switch(config) {
 
    case PWM_ENABLE:
-	  for(pwmFind=(pwmNumber%NUMBER_OF_TIMERS);pwmFind<PWM_TOTALNUMBER;pwmFind+=4){
-		  if(pwmIsAttached(pwmFind ))
-			  break;
-	  }// me fijo si el timer ya esta iniciado (me ahorro iniciarlo mas de una vez)
-	  if(pwmFind>=PWM_TOTALNUMBER){
+
+	  if(aux->configured==FALSE){ // me fijo si el timer ya esta configurado, me ahorro configurarlo de nuevo
       pwmInitTimers(pwmNumber);
+      aux->configured=TRUE;
 	  }
       break;
 
