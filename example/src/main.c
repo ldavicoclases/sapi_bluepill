@@ -70,28 +70,10 @@ int main(void)
     uartWriteString(UART_2, "Esta es la consola 2\r\n");
 
     pwmInit(TIM1_CH1,PWM_ENABLE);
-    pwmInit(TIM1_CH2,PWM_ENABLE);
-    pwmInit(TIM1_CH3,PWM_ENABLE);
-    pwmInit(TIM1_CH4,PWM_ENABLE);
-    pwmInit(TIM2_CH1,PWM_ENABLE);
-    pwmInit(TIM2_CH2,PWM_ENABLE);
-    pwmInit(TIM2_CH3,PWM_ENABLE);
-    pwmInit(TIM2_CH4,PWM_ENABLE);
-    pwmInit(TIM3_CH1,PWM_ENABLE);
-    pwmInit(TIM3_CH2,PWM_ENABLE);
-    pwmInit(TIM3_CH3,PWM_ENABLE);
-    pwmInit(TIM3_CH4,PWM_ENABLE);
-    pwmInit(TIM4_CH1,PWM_ENABLE);
-    pwmInit(TIM4_CH2,PWM_ENABLE);
-    pwmInit(TIM4_CH3,PWM_ENABLE);
-    pwmInit(TIM4_CH4,PWM_ENABLE);
-
-
-//    pwmInit(TIM1_CH1,PWM_ENABLE);
     pwmInit(TIM1_CH1,PWM_ENABLE_OUTPUT); //PA8
-//    pwmInit(TIM1_CH3,PWM_ENABLE);
-//    pwmInit(TIM1_CH3,PWM_ENABLE_OUTPUT); //PA8
-//    pwmWrite(TIM1_CH1,191); //75% de ciclo de actividad
+    pwmInit(TIM1_CH3,PWM_ENABLE);
+    pwmInit(TIM1_CH3,PWM_ENABLE_OUTPUT); //PA8
+    pwmWrite(TIM1_CH1,191); //75% de ciclo de actividad
     if(pwmRead(TIM1_CH1, &value)){
     	if (value == 191){
     	    uartWriteString(UART_1, "TIM1 Channel 1: PWM activo a 75% de ciclo de actividad\r\n");
