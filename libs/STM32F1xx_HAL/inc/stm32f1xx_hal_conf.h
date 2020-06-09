@@ -80,6 +80,7 @@
 #define HAL_RTC_MODULE_ENABLED
 #define HAL_PCD_MODULE_ENABLED
 #define HAL_TIM_MODULE_ENABLED
+#define HAL_SPI_MODULE_ENABLED
 
 /* ########################## Oscillator Values adaptation ####################*/
 /**
