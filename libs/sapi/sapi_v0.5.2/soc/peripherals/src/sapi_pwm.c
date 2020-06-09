@@ -165,78 +165,68 @@ static uint8_t AttachedPWMList[PWM_TOTALNUMBER] = {
  */
 static void pwmInitTimers(pwmMap_t pwmNumber)
 {
-    TIM_HandleTypeDef* aux;
+    TIM_HandleTypeDef* handle;
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-    aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+    handle = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
     switch(pwmNumber){
 
         case TIM1_CH1:
         case TIM1_CH2:
         case TIM1_CH3:
         case TIM1_CH4:
-             aux->Instance= TIM1;
-             aux->Init.Period =PWM_T1PERIOD;
+             handle->Instance= TIM1;
+             handle->Init.Period =PWM_T1PERIOD;
              __HAL_RCC_TIM1_CLK_ENABLE();
             break;
         case TIM2_CH1:
         case TIM2_CH2:
         case TIM2_CH3:
         case TIM2_CH4:
-            aux->Instance= TIM2;
-            aux->Init.Period =PWM_T2PERIOD;
+            handle->Instance= TIM2;
+            handle->Init.Period =PWM_T2PERIOD;
             __HAL_RCC_TIM2_CLK_ENABLE();
             break;
         case TIM3_CH1:
         case TIM3_CH2:
         case TIM3_CH3:
         case TIM3_CH4:
-            aux->Instance= TIM3;
-            aux->Init.Period =PWM_T3PERIOD;
+            handle->Instance= TIM3;
+            handle->Init.Period =PWM_T3PERIOD;
             __HAL_RCC_TIM3_CLK_ENABLE();
             break;
         case TIM4_CH1:
         case TIM4_CH2:
         case TIM4_CH3:
         case TIM4_CH4:
-            aux->Instance= TIM4;
-            aux->Init.Period =PWM_T4PERIOD;
+            handle->Instance= TIM4;
+            handle->Init.Period =PWM_T4PERIOD;
             __HAL_RCC_TIM4_CLK_ENABLE();
             break;
     }
-    aux->Init.Prescaler = 0;
-    aux->Init.CounterMode = TIM_COUNTERMODE_UP;
-    aux->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    aux->Init.RepetitionCounter = 0;
-    aux->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(aux) != HAL_OK)
-    {
-        Error_Handler();
-    }
+    handle->Init.Prescaler = 0;
+    handle->Init.CounterMode = TIM_COUNTERMODE_UP;
+    handle->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    handle->Init.RepetitionCounter = 0;
+    handle->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    HAL_TIM_Base_Init(handle);
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(aux, &sClockSourceConfig) != HAL_OK)
-    {
-        Error_Handler();
-    }
-    if (HAL_TIM_PWM_Init(aux) != HAL_OK)
-    {
-        Error_Handler();
-    }
+    HAL_TIM_ConfigClockSource(handle, &sClockSourceConfig);
+
+    HAL_TIM_PWM_Init(handle);
+
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(aux, &sMasterConfig) != HAL_OK)
-    {
-        Error_Handler();
-    }
+    HAL_TIMEx_MasterConfigSynchronization(handle, &sMasterConfig);
 }
 
 static bool_t enablePwmFor(pwmMap_t pwmNumber){
-   TIM_HandleTypeDef* aux;
+   TIM_HandleTypeDef* handle;
    TIM_OC_InitTypeDef sConfigOC = {0};
    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
    GPIO_InitTypeDef GPIO_InitStruct = {0};
-   aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+   handle = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
 
    sConfigOC.OCMode = TIM_OCMODE_PWM1;
 
@@ -254,34 +244,34 @@ static bool_t enablePwmFor(pwmMap_t pwmNumber){
    sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
    sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
 
-   if (HAL_TIMEx_ConfigBreakDeadTime(aux, &sBreakDeadTimeConfig) != HAL_OK)
+   if (HAL_TIMEx_ConfigBreakDeadTime(handle, &sBreakDeadTimeConfig) != HAL_OK)
    {
       Error_Handler();
    }
 
 
-   if(aux->Instance==TIM1){
+   if(handle->Instance==TIM1){
       sConfigOC.Pulse =PWM_T1PERIOD/2;  // arranca en la mitad de ciclo de actividad
       __HAL_RCC_GPIOA_CLK_ENABLE();
    }
 
-   if(aux->Instance==TIM2){
+   if(handle->Instance==TIM2){
       sConfigOC.Pulse =PWM_T2PERIOD/2;
       __HAL_RCC_GPIOA_CLK_ENABLE();
    }
 
-   if(aux->Instance==TIM3){
+   if(handle->Instance==TIM3){
       sConfigOC.Pulse =PWM_T3PERIOD/2;
       __HAL_RCC_GPIOA_CLK_ENABLE();
       __HAL_RCC_GPIOB_CLK_ENABLE();
    }
 
-   if(aux->Instance==TIM4){
+   if(handle->Instance==TIM4){
       sConfigOC.Pulse =PWM_T4PERIOD/2;
       __HAL_RCC_GPIOB_CLK_ENABLE();
    }
 
-   if (HAL_TIM_PWM_ConfigChannel(aux, &sConfigOC, channel[pwmNumber/NUMBER_OF_TIMERS]) != HAL_OK)
+   if (HAL_TIM_PWM_ConfigChannel(handle, &sConfigOC, channel[pwmNumber/NUMBER_OF_TIMERS]) != HAL_OK)
    {
       Error_Handler();
    }
@@ -326,8 +316,8 @@ static bool_t enablePwmFor(pwmMap_t pwmNumber){
          break;
    }
 
-   HAL_TIM_Base_Start(aux);
-   HAL_TIM_PWM_Start(aux,channel[pwmNumber/NUMBER_OF_TIMERS]);
+   HAL_TIM_Base_Start(handle);
+   HAL_TIM_PWM_Start(handle,channel[pwmNumber/NUMBER_OF_TIMERS]);
 }
 
 /*
@@ -384,15 +374,15 @@ static bool_t pwmDetach( pwmMap_t pwmNumber )
  */
 bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
 {
-   TIM_HandleTypeDef* aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+   TIM_HandleTypeDef* handle = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
    bool_t success = FALSE;
    uint8_t position = 0;
-   uint16_t pwmPeriod = ((uint16_t)aux->Init.Period*value)/255;
+   uint16_t pwmPeriod = ((uint16_t)handle->Init.Period*value)/255;
 
    position = pwmIsAttached(pwmNumber);
 
    if(position) {
-      __HAL_TIM_SET_COMPARE(aux, channel[pwmNumber/NUMBER_OF_TIMERS], pwmPeriod);
+      __HAL_TIM_SET_COMPARE(handle, channel[pwmNumber/NUMBER_OF_TIMERS], pwmPeriod);
       success = TRUE;
    }
 
@@ -407,14 +397,14 @@ bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
  */
 bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv )
 {
-   TIM_HandleTypeDef* aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+   TIM_HandleTypeDef* handle = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
    uint8_t position = 0;
    position = pwmIsAttached(pwmNumber);
-   uint16_t pwmPeriod = (uint16_t)aux->Init.Period;
+   uint16_t pwmPeriod = (uint16_t)handle->Init.Period;
    uint32_t value=0;
 
    if(position) {
-       value= (__HAL_TIM_GET_COMPARE(aux, channel[pwmNumber/NUMBER_OF_TIMERS]));
+       value= (__HAL_TIM_GET_COMPARE(handle, channel[pwmNumber/NUMBER_OF_TIMERS]));
        value*=255;
        value/=pwmPeriod;
        if(value)
@@ -435,15 +425,15 @@ bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv )
  */
 bool_t pwmInit( pwmMap_t pwmNumber, pwmInit_t config)
 {
-   timerStmInit_t* aux = &stmTimers[pwmNumber%4];
+   timerStmInit_t* timer = &stmTimers[pwmNumber%4];
    bool_t ret_val = 1;
 
    switch(config) {
 
    case PWM_ENABLE:
-      if( aux->configured==FALSE ) {
+      if( timer->configured==FALSE ) {
           pwmInitTimers(pwmNumber);
-          aux->configured=TRUE;
+          timer->configured=TRUE;
       }
       break;
 
