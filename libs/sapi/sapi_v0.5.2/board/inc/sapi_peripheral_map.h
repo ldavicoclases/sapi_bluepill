@@ -2,6 +2,7 @@
  * Copyright 2016, Ian Olivieri.
  * Copyright 2016, Eric Pernia.
  * Copyright 2020, Nahuel Espinosa.
+ * Copyright 2020, Guillermo Ferrari.
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -92,9 +93,9 @@ typedef enum {
    UART_MAXNUM,
 } uartMap_t;
 
-/*Defined for sapi_timer.h*/
+/*Defined for sapi_timer.h and sapi_pwm.h*/
 typedef enum {
-   TIMER0, TIMER1, TIMER2, TIMER3
+   TIMER1=0, TIMER2, TIMER3,TIMER4
 } timerMap_t;
 typedef enum {
    TIMERCOMPAREMATCH0, TIMERCOMPAREMATCH1, TIMERCOMPAREMATCH2, TIMERCOMPAREMATCH3
@@ -108,7 +109,8 @@ typedef enum {
 
 /*Defined for sapi_pwm.h*/
 typedef enum {
-   PWM0, PWM1, PWM2, PWM3, PWM4, PWM5, PWM6, PWM7, PWM8, PWM9, PWM10
+  TIM1_CH1=0,TIM2_CH1,TIM3_CH1,TIM4_CH1,TIM1_CH2,TIM2_CH2,TIM3_CH2,TIM4_CH2,TIM1_CH3,TIM2_CH3,TIM3_CH3,TIM4_CH3,
+  TIM1_CH4,TIM2_CH4,TIM3_CH4,TIM4_CH4
 } pwmMap_t;
 
 /*Defined for sapi_servo.h*/

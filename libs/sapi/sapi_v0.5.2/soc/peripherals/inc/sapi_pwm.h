@@ -50,6 +50,17 @@ extern "C" {
 
 #define pwmConfig pwmInit
 
+#define PWM_T1FREC          10000 /* 10Khz */      /*MIN FREC 733Hz */
+#define PWM_T2FREC          5000 /* 5000hz */
+#define PWM_T3FREC          2500 /* 2500hz */
+#define PWM_T4FREC          1000 /* 1000hz */
+//#define PWM_PERIOD        1000 /* 1000uS = 1ms*/
+
+#define PWM_T1PERIOD          ((48*1000000U)/PWM_T1FREC)
+#define PWM_T2PERIOD          ((48*1000000U)/PWM_T2FREC)
+#define PWM_T3PERIOD          ((48*1000000U)/PWM_T3FREC)
+#define PWM_T4PERIOD          ((48*1000000U)/PWM_T4FREC)
+
 /*==================[typedef]================================================*/
 
 typedef enum{
@@ -80,7 +91,7 @@ uint8_t pwmIsAttached( pwmMap_t pwmNumber );
  * @return:   value of the pwm in the pin (0 ~ 255).
  *   If an error ocurred, return = EMPTY_POSITION = 255
  */
-uint8_t pwmRead( pwmMap_t pwmNumber );
+bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv );
 
 /*
  * @brief:   change the value of the pwm at the selected pin
@@ -89,6 +100,8 @@ uint8_t pwmRead( pwmMap_t pwmNumber );
  * @return:   True if the value was successfully changed, False if not.
  */
 bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t percent );
+
+bool_t EnablePwmfor(pwmMap_t pwmNumber);
 
 /*==================[c++]====================================================*/
 #ifdef __cplusplus
