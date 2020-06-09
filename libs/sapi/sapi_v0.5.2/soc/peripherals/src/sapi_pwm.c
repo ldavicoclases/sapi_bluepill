@@ -231,6 +231,105 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
     }
 }
 
+static bool_t enablePwmFor(pwmMap_t pwmNumber){
+   TIM_HandleTypeDef* aux;
+   TIM_OC_InitTypeDef sConfigOC = {0};
+   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+   GPIO_InitTypeDef GPIO_InitStruct = {0};
+   aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
+
+   sConfigOC.OCMode = TIM_OCMODE_PWM1;
+
+   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+
+   sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+   sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+   sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+   sBreakDeadTimeConfig.DeadTime = 0;
+   sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+   sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+   sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+
+   if (HAL_TIMEx_ConfigBreakDeadTime(aux, &sBreakDeadTimeConfig) != HAL_OK)
+   {
+      Error_Handler();
+   }
+
+
+   if(aux->Instance==TIM1){
+      sConfigOC.Pulse =PWM_T1PERIOD/2;  // arranca en la mitad de ciclo de actividad
+      __HAL_RCC_GPIOA_CLK_ENABLE();
+   }
+
+   if(aux->Instance==TIM2){
+      sConfigOC.Pulse =PWM_T2PERIOD/2;
+      __HAL_RCC_GPIOA_CLK_ENABLE();
+   }
+
+   if(aux->Instance==TIM3){
+      sConfigOC.Pulse =PWM_T3PERIOD/2;
+      __HAL_RCC_GPIOA_CLK_ENABLE();
+      __HAL_RCC_GPIOB_CLK_ENABLE();
+   }
+
+   if(aux->Instance==TIM4){
+      sConfigOC.Pulse =PWM_T4PERIOD/2;
+      __HAL_RCC_GPIOB_CLK_ENABLE();
+   }
+
+   if (HAL_TIM_PWM_ConfigChannel(aux, &sConfigOC, channel[pwmNumber/NUMBER_OF_TIMERS]) != HAL_OK)
+   {
+      Error_Handler();
+   }
+
+   switch(pwmNumber){
+
+      case TIM1_CH1:
+      case TIM2_CH1:
+      case TIM3_CH1:
+      case TIM4_CH1:
+         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.gpio.pin;
+         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.mode;
+         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.speed;
+         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.gpio.port, &GPIO_InitStruct);
+         break;
+      case TIM1_CH2:
+      case TIM2_CH2:
+      case TIM3_CH2:
+      case TIM4_CH2:
+         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.gpio.pin;
+         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.mode;
+         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.speed;
+         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.gpio.port, &GPIO_InitStruct);
+         break;
+      case TIM1_CH3:
+      case TIM2_CH3:
+      case TIM3_CH3:
+      case TIM4_CH3:
+         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.gpio.pin;
+         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.mode;
+         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.speed;
+         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.gpio.port, &GPIO_InitStruct);
+         break;
+      case TIM1_CH4:
+      case TIM2_CH4:
+      case TIM3_CH4:
+      case TIM4_CH4:
+         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.gpio.pin;
+         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.mode;
+         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.speed;
+         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.gpio.port, &GPIO_InitStruct);
+         break;
+   }
+
+   HAL_TIM_Base_Start(aux);
+   HAL_TIM_PWM_Start(aux,channel[pwmNumber/NUMBER_OF_TIMERS]);
+}
+
 /*
  * @brief:   adds pwm to the the list of working pwms
  * @param:   pwmNumber:   ID of the pwm
@@ -247,7 +346,7 @@ static bool_t pwmAttach( pwmMap_t pwmNumber)
       position = pwmIsAttached(EMPTY_POSITION); /* Searches for the first empty position */
       if(position) { /* if position==0 => there is no room in the list for another pwm */
          AttachedPWMList[position-1] = pwmNumber;
-         EnablePwmfor(pwmNumber);
+         enablePwmFor(pwmNumber);
          success = TRUE;
       }
    }
@@ -388,105 +487,6 @@ uint8_t pwmIsAttached( pwmMap_t pwmNumber )
    }
 
    return positionInList;
-}
-
-bool_t EnablePwmfor(pwmMap_t pwmNumber){
-   TIM_HandleTypeDef* aux;
-   TIM_OC_InitTypeDef sConfigOC = {0};
-   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-   GPIO_InitTypeDef GPIO_InitStruct = {0};
-   aux = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
-
-   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-
-   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-
-   sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-   sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-   sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-   sBreakDeadTimeConfig.DeadTime = 0;
-   sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-   sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-   sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-
-   if (HAL_TIMEx_ConfigBreakDeadTime(aux, &sBreakDeadTimeConfig) != HAL_OK)
-   {
-      Error_Handler();
-   }
-
-
-   if(aux->Instance==TIM1){
-      sConfigOC.Pulse =PWM_T1PERIOD/2;  // arranca en la mitad de ciclo de actividad
-      __HAL_RCC_GPIOA_CLK_ENABLE();
-   }
-
-   if(aux->Instance==TIM2){
-      sConfigOC.Pulse =PWM_T2PERIOD/2;
-      __HAL_RCC_GPIOA_CLK_ENABLE();
-   }
-
-   if(aux->Instance==TIM3){
-      sConfigOC.Pulse =PWM_T3PERIOD/2;
-      __HAL_RCC_GPIOA_CLK_ENABLE();
-      __HAL_RCC_GPIOB_CLK_ENABLE();
-   }
-
-   if(aux->Instance==TIM4){
-      sConfigOC.Pulse =PWM_T4PERIOD/2;
-      __HAL_RCC_GPIOB_CLK_ENABLE();
-   }
-
-   if (HAL_TIM_PWM_ConfigChannel(aux, &sConfigOC, channel[pwmNumber/NUMBER_OF_TIMERS]) != HAL_OK)
-   {
-      Error_Handler();
-   }
-
-   switch(pwmNumber){
-
-      case TIM1_CH1:
-      case TIM2_CH1:
-      case TIM3_CH1:
-      case TIM4_CH1:
-         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.gpio.pin;
-         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.mode;
-         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.speed;
-         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh1Pin.gpio.port, &GPIO_InitStruct);
-         break;
-      case TIM1_CH2:
-      case TIM2_CH2:
-      case TIM3_CH2:
-      case TIM4_CH2:
-         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.gpio.pin;
-         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.mode;
-         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.speed;
-         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh2Pin.gpio.port, &GPIO_InitStruct);
-         break;
-      case TIM1_CH3:
-      case TIM2_CH3:
-      case TIM3_CH3:
-      case TIM4_CH3:
-         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.gpio.pin;
-         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.mode;
-         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.speed;
-         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh3Pin.gpio.port, &GPIO_InitStruct);
-         break;
-      case TIM1_CH4:
-      case TIM2_CH4:
-      case TIM3_CH4:
-      case TIM4_CH4:
-         GPIO_InitStruct.Pin = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.gpio.pin;
-         GPIO_InitStruct.Mode = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.mode;
-         GPIO_InitStruct.Speed = stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.speed;
-         HAL_GPIO_Init(stmTimers[pwmNumber%NUMBER_OF_TIMERS].pwmCh4Pin.gpio.port, &GPIO_InitStruct);
-         break;
-   }
-
-   HAL_TIM_Base_Start(aux);
-   HAL_TIM_PWM_Start(aux,channel[pwmNumber/NUMBER_OF_TIMERS]);
 }
 
 /*==================[end of file]============================================*/

@@ -101,8 +101,6 @@ bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv );
  */
 bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t percent );
 
-bool_t EnablePwmfor(pwmMap_t pwmNumber);
-
 /*==================[c++]====================================================*/
 #ifdef __cplusplus
 }
