@@ -34,7 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Date: 2020-04-21 */
+/* Date: 2020-06-08 */
 
 #ifndef _SAPI_PERIPHERALMAP_H_
 #define _SAPI_PERIPHERALMAP_H_
@@ -93,9 +93,9 @@ typedef enum {
    UART_MAXNUM,
 } uartMap_t;
 
-/*Defined for sapi_timer.h and sapi_pwm.h*/
+/*Defined for sapi_timer.h*/
 typedef enum {
-   TIMER1=0, TIMER2, TIMER3,TIMER4
+   TIMER0, TIMER1, TIMER2, TIMER3
 } timerMap_t;
 typedef enum {
    TIMERCOMPAREMATCH0, TIMERCOMPAREMATCH1, TIMERCOMPAREMATCH2, TIMERCOMPAREMATCH3
@@ -109,8 +109,10 @@ typedef enum {
 
 /*Defined for sapi_pwm.h*/
 typedef enum {
-  TIM1_CH1=0,TIM2_CH1,TIM3_CH1,TIM4_CH1,TIM1_CH2,TIM2_CH2,TIM3_CH2,TIM4_CH2,TIM1_CH3,TIM2_CH3,TIM3_CH3,TIM4_CH3,
-  TIM1_CH4,TIM2_CH4,TIM3_CH4,TIM4_CH4
+   TIM1_CH1, TIM2_CH1, TIM3_CH1, TIM4_CH1,
+   TIM1_CH2, TIM2_CH2, TIM3_CH2, TIM4_CH2,
+   TIM1_CH3, TIM2_CH3, TIM3_CH3, TIM4_CH3,
+   TIM1_CH4, TIM2_CH4, TIM3_CH4, TIM4_CH4
 } pwmMap_t;
 
 /*Defined for sapi_servo.h*/

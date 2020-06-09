@@ -1,5 +1,6 @@
 /* Copyright 2016, Ian Olivieri
  * Copyright 2016, Eric Pernia.
+ * Copyright 2020, Guillermo Ferrari.
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -31,7 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Date: 2016-02-10 */
+/* Date: 2020-06-08 */
 
 #ifndef _SAPI_PWM_H_
 #define _SAPI_PWM_H_
@@ -50,16 +51,15 @@ extern "C" {
 
 #define pwmConfig pwmInit
 
-#define PWM_T1FREC          10000 /* 10Khz */      /*MIN FREC 733Hz */
+#define PWM_T1FREC          10000 /* 10Khz */      /* MIN FREC 733Hz */
 #define PWM_T2FREC          5000 /* 5000hz */
 #define PWM_T3FREC          2500 /* 2500hz */
 #define PWM_T4FREC          1000 /* 1000hz */
-//#define PWM_PERIOD        1000 /* 1000uS = 1ms*/
 
-#define PWM_T1PERIOD          ((48*1000000U)/PWM_T1FREC)
-#define PWM_T2PERIOD          ((48*1000000U)/PWM_T2FREC)
-#define PWM_T3PERIOD          ((48*1000000U)/PWM_T3FREC)
-#define PWM_T4PERIOD          ((48*1000000U)/PWM_T4FREC)
+#define PWM_T1PERIOD        ((48*1000000U)/PWM_T1FREC)
+#define PWM_T2PERIOD        ((48*1000000U)/PWM_T2FREC)
+#define PWM_T3PERIOD        ((48*1000000U)/PWM_T3FREC)
+#define PWM_T4PERIOD        ((48*1000000U)/PWM_T4FREC)
 
 /*==================[typedef]================================================*/
 
