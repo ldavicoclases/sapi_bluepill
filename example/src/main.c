@@ -41,12 +41,17 @@ int main(void)
     init_time.month = 4;
     init_time.year = 2020;
 
+    uint8_t data=0x80,pepe=0xAA,mant,exp;
+    uint32_t regs[4];
+    float lux;
+
     boardInit();
+    i2cInit(I2C_1,100000);
 
 
     rtcInit();
 
-     rtcWrite(&init_time);
+    rtcWrite(&init_time);
 
     delayInit(&tiempo_encendido, 500);
     delayInit(&tiempo_conversion, 50);
@@ -72,7 +77,7 @@ int main(void)
     pwmInit(TIM1_CH1,PWM_ENABLE);
     pwmInit(TIM1_CH1,PWM_ENABLE_OUTPUT); //PA8
     pwmInit(TIM1_CH3,PWM_ENABLE);
-    pwmInit(TIM1_CH3,PWM_ENABLE_OUTPUT); //PA8
+    pwmInit(TIM1_CH3,PWM_ENABLE_OUTPUT); //PA10
     pwmWrite(TIM1_CH1,191); //75% de ciclo de actividad
     if(pwmRead(TIM1_CH1, &value)){
     	if (value == 191){

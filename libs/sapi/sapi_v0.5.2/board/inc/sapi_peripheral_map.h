@@ -118,7 +118,10 @@ typedef enum {
    SERVO0, SERVO1, SERVO2, SERVO3, SERVO4, SERVO5, SERVO6, SERVO7, SERVO8
 } servoMap_t;
 
-typedef uint8_t i2cMap_t;
+typedef enum {
+   I2C_1=0,
+   I2C_2
+} i2cMap_t;;
 
 typedef enum {
    SPI_1,

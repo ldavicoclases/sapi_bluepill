@@ -1,6 +1,7 @@
 /* Copyright 2016, Eric Pernia
  * Copyright 2016, Alejandro Permingeat.
  * Copyright 2016, Eric Pernia
+ * Copyright 2020, Guillermo Ferrari
  * All rights reserved.
  *
  * This file is part sAPI library for microcontrollers.
@@ -51,8 +52,38 @@
 /*==================[macros and definitions]=================================*/
 
 /*==================[internal data declaration]==============================*/
+typedef struct{
+   I2C_HandleTypeDef*       i2c;
+   pinInitGpioStm32f1xx_t   SDAPin;
+   pinInitGpioStm32f1xx_t   SCLPin;
+} I2CStmInit_t;
+
+I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+
+static const I2CStmInit_t stmI2Cs[] = {
+
+        &hi2c1,
+        {{GPIOB, GPIO_PIN_7 }, GPIO_MODE_AF_OD, GPIO_PULLUP, GPIO_SPEED_FREQ_HIGH},
+        {{GPIOB, GPIO_PIN_6}, GPIO_MODE_AF_OD, GPIO_PULLUP, GPIO_SPEED_FREQ_HIGH},
+
+        &hi2c2,
+        {{GPIOB, GPIO_PIN_11 }, GPIO_MODE_AF_OD, GPIO_PULLUP, GPIO_SPEED_FREQ_HIGH},
+        {{GPIOB, GPIO_PIN_10}, GPIO_MODE_AF_OD, GPIO_PULLUP, GPIO_SPEED_FREQ_HIGH},
+
+};
 
 /*==================[internal functions declaration]=========================*/
+
+/*This four functions works for "fix" busy flag bug in HAL I2C Initialization*/
+
+static HAL_StatusTypeDef I2C_ClearBusyFlagErrata_2_14_7(i2cMap_t i2cNumber);
+
+static void saveI2CRegisters(I2C_HandleTypeDef* hi2c,uint32_t* regs);
+
+static void restoreI2CRegisters(I2C_HandleTypeDef* hi2c,uint32_t* regs);
+
+static void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 
 #if( I2C_SOFTWARE == 1 )
 
@@ -260,16 +291,72 @@ static bool_t i2cSoftwarePinRead( uint8_t pin )
 static bool_t i2cHardwareInit( i2cMap_t i2cNumber, uint32_t clockRateHz )
 {
 
-   // Configuracion de las lineas de SDA y SCL de la placa
-   Chip_SCU_I2C0PinConfig( I2C0_STANDARD_FAST_MODE ); // Equal for CIAA-NXP and EDU-CIAA-NXP on I2C0
+    I2C_HandleTypeDef* aux= stmI2Cs[i2cNumber].i2c;
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    uint32_t regs[4];
 
-   // Inicializacion del periferico
-   Chip_I2C_Init( i2cNumber );
-   // Seleccion de velocidad del bus
-   Chip_I2C_SetClockRate( i2cNumber, clockRateHz );
-   // Configuracion para que los eventos se resuelvan por polliong
-   // (la otra opcion es por interrupcion)
-   Chip_I2C_SetMasterEventHandler( i2cNumber, Chip_I2C_EventHandlerPolling );
+    switch(i2cNumber){
+        case I2C_1:
+            aux->Instance= I2C1;
+            __HAL_RCC_I2C1_CLK_ENABLE();
+            break;
+        case I2C_2:
+            aux->Instance=I2C2;
+            __HAL_RCC_I2C2_CLK_ENABLE();
+            break;
+    }
+    aux->Instance = I2C1;
+    aux->Init.ClockSpeed = clockRateHz;
+    aux->Init.DutyCycle = I2C_DUTYCYCLE_2;
+    aux->Init.OwnAddress1 = 0;
+    aux->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    aux->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    aux->Init.OwnAddress2 = 0;
+    aux->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    aux->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    if (HAL_I2C_Init(aux) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+
+    GPIO_InitStruct.Pin = stmI2Cs[i2cNumber].SCLPin.gpio.pin;
+    GPIO_InitStruct.Mode = stmI2Cs[i2cNumber].SCLPin.mode;
+    GPIO_InitStruct.Pull = stmI2Cs[i2cNumber].SCLPin.pull;
+    GPIO_InitStruct.Speed = stmI2Cs[i2cNumber].SCLPin.speed;
+    HAL_GPIO_Init(stmI2Cs[i2cNumber].SCLPin.gpio.port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = stmI2Cs[i2cNumber].SDAPin.gpio.pin;
+    GPIO_InitStruct.Mode = stmI2Cs[i2cNumber].SDAPin.mode;
+    GPIO_InitStruct.Pull = stmI2Cs[i2cNumber].SDAPin.pull;
+    GPIO_InitStruct.Speed = stmI2Cs[i2cNumber].SDAPin.speed;
+    HAL_GPIO_Init(stmI2Cs[i2cNumber].SDAPin.gpio.port, &GPIO_InitStruct);
+
+    HAL_Delay(200); // necesario para que lo que sigue no se cuelgue
+
+
+    saveI2CRegisters(aux,regs); //salva los registros
+
+    if(I2C_ClearBusyFlagErrata_2_14_7(i2cNumber)!=HAL_OK){  //arregla un bug de la inicializacion del I2C pero deja los registros en cualquier valor
+        return FALSE;
+    }
+
+    restoreI2CRegisters(aux,regs); //recupera los registros
+
+
+//   // Configuracion de las lineas de SDA y SCL de la placa
+//   Chip_SCU_I2C0PinConfig( I2C0_STANDARD_FAST_MODE ); // Equal for CIAA-NXP and EDU-CIAA-NXP on I2C0
+//
+//   // Inicializacion del periferico
+//   Chip_I2C_Init( i2cNumber );
+//   // Seleccion de velocidad del bus
+//   Chip_I2C_SetClockRate( i2cNumber, clockRateHz );
+//   // Configuracion para que los eventos se resuelvan por polliong
+//   // (la otra opcion es por interrupcion)
+//   Chip_I2C_SetMasterEventHandler( i2cNumber, Chip_I2C_EventHandlerPolling );
 
    return TRUE;
 }
@@ -285,20 +372,20 @@ static bool_t i2cHardwareRead( i2cMap_t  i2cNumber,
 {
 
    //TODO: ver i2cData.options si se puede poner la condicion opcional de stop
-
-   I2CM_XFER_T i2cData;
-
-   i2cData.slaveAddr = i2cSlaveAddress;
-   i2cData.options   = 0;
-   i2cData.status    = 0;
-   i2cData.txBuff    = dataToReadBuffer;
-   i2cData.txSz      = dataToReadBufferSize;
-   i2cData.rxBuff    = receiveDataBuffer;
-   i2cData.rxSz      = receiveDataBufferSize;
-
-   if( Chip_I2CM_XferBlocking( LPC_I2C0, &i2cData ) == 0 ) {
-      return FALSE;
-   }
+//
+//   I2CM_XFER_T i2cData;
+//
+//   i2cData.slaveAddr = i2cSlaveAddress;
+//   i2cData.options   = 0;
+//   i2cData.status    = 0;
+//   i2cData.txBuff    = dataToReadBuffer;
+//   i2cData.txSz      = dataToReadBufferSize;
+//   i2cData.rxBuff    = receiveDataBuffer;
+//   i2cData.rxSz      = receiveDataBufferSize;
+//
+//   if( Chip_I2CM_XferBlocking( LPC_I2C0, &i2cData ) == 0 ) {
+//      return FALSE;
+//   }
 
    return TRUE;
 }
@@ -312,25 +399,25 @@ static bool_t i2cHardwareWrite( i2cMap_t  i2cNumber,
 
    //TODO: ver i2cData.options si se puede poner la condicion opcional de stop
 
-   I2CM_XFER_T i2cData;
-
-   if( i2cNumber != I2C0 ) {
-      return FALSE;
-   }
-
-   // Prepare the i2cData register
-   i2cData.slaveAddr = i2cSlaveAddress;
-   i2cData.options   = 0;
-   i2cData.status    = 0;
-   i2cData.txBuff    = transmitDataBuffer;
-   i2cData.txSz      = transmitDataBufferSize;
-   i2cData.rxBuff    = 0;
-   i2cData.rxSz      = 0;
-
-   /* Send the i2c data */
-   if( Chip_I2CM_XferBlocking( LPC_I2C0, &i2cData ) == 0 ) {
-      return FALSE;
-   }
+//   I2CM_XFER_T i2cData;
+//
+//   if( i2cNumber != I2C0 ) {
+//      return FALSE;
+//   }
+//
+//   // Prepare the i2cData register
+//   i2cData.slaveAddr = i2cSlaveAddress;
+//   i2cData.options   = 0;
+//   i2cData.status    = 0;
+//   i2cData.txBuff    = transmitDataBuffer;
+//   i2cData.txSz      = transmitDataBufferSize;
+//   i2cData.rxBuff    = 0;
+//   i2cData.rxSz      = 0;
+//
+//   /* Send the i2c data */
+//   if( Chip_I2CM_XferBlocking( LPC_I2C0, &i2cData ) == 0 ) {
+//      return FALSE;
+//   }
 
    /* *** TEST I2C Response ***
 
@@ -353,6 +440,129 @@ static bool_t i2cHardwareWrite( i2cMap_t  i2cNumber,
 #endif
 
 
+static HAL_StatusTypeDef I2C_ClearBusyFlagErrata_2_14_7(i2cMap_t i2cNumber) {
+
+    I2C_HandleTypeDef * aux= stmI2Cs[i2cNumber].i2c;
+//    static uint8_t resetTried = 0;
+//    if (resetTried == 1) {
+//        return HAL_ERROR ;
+//    }
+    uint32_t SDA_PIN = stmI2Cs[i2cNumber].SDAPin.gpio.pin ;
+    uint32_t SCL_PIN = stmI2Cs[i2cNumber].SCLPin.gpio.pin ;
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+    // 1
+    __HAL_I2C_DISABLE(aux);
+
+    // 2
+    GPIO_InitStruct.Pin = SDA_PIN|SCL_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_GPIO_WRITE_ODR(GPIOB, SDA_PIN);
+    HAL_GPIO_WRITE_ODR(GPIOB, SCL_PIN);
+
+    // 3
+ //   GPIO_PinState pinState;
+    if (HAL_GPIO_ReadPin(GPIOB, SDA_PIN) == GPIO_PIN_RESET) {
+       return HAL_ERROR;
+    }
+    if (HAL_GPIO_ReadPin(GPIOB, SCL_PIN) == GPIO_PIN_RESET) {
+        return HAL_ERROR;
+    }
+
+    // 4
+    GPIO_InitStruct.Pin = SDA_PIN;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_GPIO_TogglePin(GPIOB, SDA_PIN);
+
+    // 5
+    if (HAL_GPIO_ReadPin(GPIOB, SDA_PIN) == GPIO_PIN_SET) {
+        return HAL_ERROR;
+    }
+
+    // 6
+    GPIO_InitStruct.Pin = SCL_PIN;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_GPIO_TogglePin(GPIOB, SCL_PIN);
+
+    // 7
+    if (HAL_GPIO_ReadPin(GPIOB, SCL_PIN) == GPIO_PIN_SET) {
+        return HAL_ERROR;
+    }
+
+    // 8
+    GPIO_InitStruct.Pin = SDA_PIN;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_GPIO_WRITE_ODR(GPIOB, SDA_PIN);
+
+    // 9
+    if (HAL_GPIO_ReadPin(GPIOB, SDA_PIN) == GPIO_PIN_RESET) {
+        return HAL_ERROR;
+    }
+
+    // 10
+    GPIO_InitStruct.Pin = SCL_PIN;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_GPIO_WRITE_ODR(GPIOB, SCL_PIN);
+
+    // 11
+    if (HAL_GPIO_ReadPin(GPIOB, SCL_PIN) == GPIO_PIN_RESET) {
+        return HAL_ERROR;
+    }
+
+    // 12
+    GPIO_InitStruct.Pin = SDA_PIN|SCL_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+   // 13
+    aux->Instance->CR1 |= I2C_CR1_SWRST;
+
+   // 14
+   aux->Instance->CR1 ^= I2C_CR1_SWRST;
+
+   // 15
+   __HAL_I2C_ENABLE(aux);
+
+//   resetTried = 1;
+   return HAL_OK;
+}
+
+static void saveI2CRegisters(I2C_HandleTypeDef* hi2c,uint32_t* regs){
+    regs[0]=READ_REG(hi2c->Instance->CR2);
+    regs[1]=READ_REG(hi2c->Instance->OAR1);
+    regs[2]=READ_REG(hi2c->Instance->CCR);
+    regs[3]=READ_REG(hi2c->Instance->TRISE);
+    return;
+
+}
+
+static void restoreI2CRegisters(I2C_HandleTypeDef* hi2c,uint32_t* regs){
+    WRITE_REG(hi2c->Instance->CR2,regs[0]);
+    WRITE_REG(hi2c->Instance->OAR1,regs[1]);
+    WRITE_REG(hi2c->Instance->CCR,regs[2]);
+    WRITE_REG(hi2c->Instance->TRISE,regs[3]);
+    return;
+
+}
+
+static void HAL_GPIO_WRITE_ODR(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+{
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+
+  GPIOx->ODR |= GPIO_Pin;
+}
+
+
+
 /*==================[external functions definition]==========================*/
 
 bool_t i2cInit( i2cMap_t i2cNumber, uint32_t clockRateHz )
@@ -360,7 +570,7 @@ bool_t i2cInit( i2cMap_t i2cNumber, uint32_t clockRateHz )
 
    bool_t retVal = FALSE;
 
-   if( i2cNumber != I2C0 ) {
+   if( i2cNumber != I2C_1 && i2cNumber != I2C_2 ) {
       return FALSE;
    }
 
@@ -386,7 +596,7 @@ bool_t i2cRead( i2cMap_t  i2cNumber,
 
    bool_t retVal = FALSE;
 
-   if( i2cNumber != I2C0 ) {
+   if( i2cNumber != I2C_1 && i2cNumber != I2C_2 ) {
       return FALSE;
    }
 
@@ -423,7 +633,7 @@ bool_t i2cWrite( i2cMap_t  i2cNumber,
 
    bool_t retVal = FALSE;
 
-   if( i2cNumber != I2C0 ) {
+   if( i2cNumber != I2C_1 && i2cNumber != I2C_2 ) {
       return FALSE;
    }
 
