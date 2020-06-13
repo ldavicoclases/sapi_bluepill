@@ -28,6 +28,10 @@ int main(void)
 {
     uint8_t i;
     uint8_t recibido,value;
+    uint8_t reg = 0x06;
+    uint8_t data_in[] = {0x06,0xAA};
+    uint8_t data_out = 0x80;
+    uint8_t slave_addr=0x94;
     delay_t tiempo_encendido, tiempo_conversion;
     gpioMap_t secuencia[] = {PB0, PB1, PB3, PB4, PB5, PB6, PB7,
                              PB8, PB9,PB10, PB11, PB12, PB13, PB14, PB15};
@@ -41,14 +45,16 @@ int main(void)
     init_time.month = 4;
     init_time.year = 2020;
 
-    uint8_t data=0x80,pepe=0xAA,mant,exp;
-    uint32_t regs[4];
-    float lux;
 
     boardInit();
+
+    gpioInit(PB0,GPIO_OUTPUT); //using a MAX44009 light sensor for testing I2C, an address pin should be driven low
+    gpioWrite(PB0,RESET);
+
     i2cInit(I2C_1,100000);
 
-
+    i2cWrite(I2C_1,slave_addr,data_in,sizeof(data_in),TRUE);
+    i2cRead(I2C_1,slave_addr,&reg,sizeof(reg),TRUE,&data_out,sizeof(data_out),TRUE);
     rtcInit();
 
     rtcWrite(&init_time);
