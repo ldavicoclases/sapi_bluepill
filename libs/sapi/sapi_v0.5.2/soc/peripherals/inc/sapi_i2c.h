@@ -69,6 +69,14 @@ extern "C" {
 
 #define i2cConfig i2cInit
 
+/*==================[Default Constants]======================================*/
+
+#define I2C_DEFAULT_TIMEOUT       100U
+#define I2C_NO_OPTION_FRAME       0xFFFF0000U /*!< XferOptions default value */
+#define I2C_TIMEOUT_FLAG          35U         /*!< Timeout 35 ms             */
+#define I2C_TIMEOUT_BUSY_FLAG     25U         /*!< Timeout 25 ms             */
+#define I2C_STATE_NONE            ((uint32_t)(HAL_I2C_MODE_NONE))
+
 /*==================[typedef]================================================*/
 
 #if( I2C_SOFTWARE == 1 )
