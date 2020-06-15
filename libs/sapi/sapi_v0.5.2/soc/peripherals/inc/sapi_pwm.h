@@ -51,15 +51,39 @@ extern "C" {
 
 #define pwmConfig pwmInit
 
-#define PWM_T1FREC          10000 /* 10Khz */      /* MIN FREC 733Hz */
-#define PWM_T2FREC          5000 /* 5000hz */
-#define PWM_T3FREC          2500 /* 2500hz */
-#define PWM_T4FREC          1000 /* 1000hz */
+#define PWM_T1FREC          10000 /* 10Khz */
+#define PWM_T2FREC          5000  /* 5000hz */
+#define PWM_T3FREC          2500  /* 2500hz */
+#define PWM_T4FREC          50    /* 50hz */
 
-#define PWM_T1PERIOD        ((48*1000000U)/PWM_T1FREC)
-#define PWM_T2PERIOD        ((48*1000000U)/PWM_T2FREC)
-#define PWM_T3PERIOD        ((48*1000000U)/PWM_T3FREC)
-#define PWM_T4PERIOD        ((48*1000000U)/PWM_T4FREC)
+#if ((48*1000000U)/PWM_T1FREC) > 0xFFFF
+#define PWM_T1PERIOD          ((60000U)/PWM_T1FREC)
+#define PWM_T1PRESCALER       799
+#else
+#define PWM_T1PERIOD          ((48*1000000U)/PWM_T1FREC)
+#define PWM_T1PRESCALER       0
+#endif
+#if ((48*1000000U)/PWM_T2FREC) > 0xFFFF
+#define PWM_T2PERIOD          ((60000U)/PWM_T2FREC)
+#define PWM_T2PRESCALER       799
+#else
+#define PWM_T2PERIOD          ((48*1000000U)/PWM_T2FREC)
+#define PWM_T2PRESCALER       0
+#endif
+#if ((48*1000000U)/PWM_T3FREC) > 0xFFFF
+#define PWM_T3PERIOD          ((60000U)/PWM_T3FREC)
+#define PWM_T3PRESCALER       799
+#else
+#define PWM_T3PERIOD          ((48*1000000U)/PWM_T3FREC)
+#define PWM_T3PRESCALER       0
+#endif
+#if ((48*1000000U)/PWM_T4FREC) > 0xFFFF
+#define PWM_T4PERIOD          ((60000U)/PWM_T4FREC)
+#define PWM_T4PRESCALER       799
+#else
+#define PWM_T4PERIOD          ((48*1000000U)/PWM_T4FREC)
+#define PWM_T4PRESCALER       0
+#endif
 
 /*==================[typedef]================================================*/
 
