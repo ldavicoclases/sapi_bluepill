@@ -201,6 +201,7 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM1_CH4:
 			 aux->Instance= TIM1;
 			 aux->Init.Period =PWM_T1PERIOD;
+             aux->Init.Prescaler = PWM_T1PRESCALER;
 		   __HAL_RCC_TIM1_CLK_ENABLE();
 			break;
 		case TIM2_CH1:
@@ -208,7 +209,8 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM2_CH3:
 		case TIM2_CH4:
 			aux->Instance= TIM2;
-			 aux->Init.Period =PWM_T2PERIOD;
+			aux->Init.Period =PWM_T2PERIOD;
+            aux->Init.Prescaler = PWM_T2PRESCALER;
 		   __HAL_RCC_TIM2_CLK_ENABLE();
 			break;
 		case TIM3_CH1:
@@ -216,7 +218,8 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM3_CH3:
 		case TIM3_CH4:
 			aux->Instance= TIM3;
-			 aux->Init.Period =PWM_T3PERIOD;
+			aux->Init.Period =PWM_T3PERIOD;
+	        aux->Init.Prescaler = PWM_T3PRESCALER;
 		    __HAL_RCC_TIM3_CLK_ENABLE();
 			break;
 		case TIM4_CH1:
@@ -225,10 +228,10 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM4_CH4:
 			aux->Instance= TIM4;
 			 aux->Init.Period =PWM_T4PERIOD;
+		     aux->Init.Prescaler = PWM_T4PRESCALER;
 		    __HAL_RCC_TIM4_CLK_ENABLE();
 			break;
 	}
-	  aux->Init.Prescaler = 0;
 	  aux->Init.CounterMode = TIM_COUNTERMODE_UP;
 	  aux->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	  aux->Init.RepetitionCounter = 0;
