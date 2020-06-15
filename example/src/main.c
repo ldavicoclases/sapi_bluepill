@@ -71,14 +71,14 @@ int main(void)
 
     uartInit(UART_1, 9600);
 //  uartInit(UART_2, 9600);  // No se puede usar con las entradas ADC
- // uartInit(UART_3, 9600);  // No funciona en el simulador porque STM32F103C6 tiene sólo 2 UARTS
+// uartInit(UART_3, 9600);  // No funciona en el simulador porque STM32F103C6 tiene sólo 2 UARTS
 
     cdcUartInit(9600); //no entra en la memoria del STM32F103C6
 
     adcInit(ADC_ENABLE);
 
     uartWriteString(UART_1, "Esta es la consola 1\r\n");
-    uartWriteString(UART_2, "Esta es la consola 2\r\n");
+//    uartWriteString(UART_2, "Esta es la consola 2\r\n");
 
     pwmInit(TIM4_CH1,PWM_ENABLE);
     pwmInit(TIM4_CH1,PWM_ENABLE_OUTPUT); //PB6

@@ -42,7 +42,7 @@
 
 #include "sapi_pwm.h"
 #include "sapi_gpio.h"
-//#include "sapi_sct.h"
+
 
 /*==================[macros and definitions]=================================*/
 
@@ -135,6 +135,9 @@ static bool_t pwmAttach( pwmMap_t pwmNumber );
 // * @return:    True if pwm was successfully detached, False if not.
 // */
 static bool_t pwmDetach( pwmMap_t pwmNumber );
+
+static bool_t enablePwmFor(pwmMap_t pwmNumber);
+
 //
 ///*==================[internal data definition]===============================*/
 //
@@ -227,8 +230,8 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 		case TIM4_CH3:
 		case TIM4_CH4:
 			aux->Instance= TIM4;
-			 aux->Init.Period =PWM_T4PERIOD;
-		     aux->Init.Prescaler = PWM_T4PRESCALER;
+			aux->Init.Period =PWM_T4PERIOD;
+		    aux->Init.Prescaler = PWM_T4PRESCALER;
 		    __HAL_RCC_TIM4_CLK_ENABLE();
 			break;
 	}
@@ -255,9 +258,7 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
 	  {
 	    Error_Handler();
 	  }
-	 // HAL_TIM_Base_Start(aux);
-//
-////   Sct_Init(PWM_FREC);
+
 }
 //
 ///*
@@ -276,8 +277,7 @@ static bool_t pwmAttach( pwmMap_t pwmNumber)
       position = pwmIsAttached(EMPTY_POSITION); /* Searches for the first empty position */
       if(position) { /* if position==0 => there is no room in the list for another pwm */
          AttachedPWMList[position-1] = pwmNumber;
- //        Sct_EnablePwmFor(pwmMap[pwmNumber]);
-         EnablePwmfor(pwmNumber);
+         enablePwmFor(pwmNumber);
          success = TRUE;
       }
    }
@@ -322,7 +322,6 @@ bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
    position = pwmIsAttached(pwmNumber);
 
    if(position) {
-//      Sct_SetDutyCycle(pwmMap[pwmNumber], value);
 	   __HAL_TIM_SET_COMPARE(aux, channel[pwmNumber/NUMBER_OF_TIMERS], pwmPeriod);
       success = TRUE;
    }
@@ -345,7 +344,6 @@ bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv )
    uint32_t value=0;
 
    if(position) {
-     // value = Sct_GetDutyCycle(pwmMap[pwmNumber]);
 	value= (__HAL_TIM_GET_COMPARE(aux, channel[pwmNumber/NUMBER_OF_TIMERS]));
 	value*=255;
 	value/=pwmPeriod;
@@ -426,7 +424,7 @@ uint8_t pwmIsAttached( pwmMap_t pwmNumber )
 
 
 
-bool_t EnablePwmfor(pwmMap_t pwmNumber){
+static bool_t enablePwmFor(pwmMap_t pwmNumber){
 		TIM_HandleTypeDef* aux;
 		TIM_OC_InitTypeDef sConfigOC = {0};
 		TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
