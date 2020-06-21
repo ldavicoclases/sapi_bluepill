@@ -34,8 +34,16 @@
 
 /* Date: 2020-06-21 */
 
+
 #ifndef _SAPI_ENCODER_H_
 #define _SAPI_ENCODER_H_
+
+
+/*==================[   WARNING!!!   ]=======================================*/
+/*      This peripheral share the hardware timers with PWM peripheral.
+ *      You should not use an PWM timer and same Encoder Timer at once
+ *      Is user's responsibility to check that.
+ */
 
 /*==================[inclusions]=============================================*/
 
