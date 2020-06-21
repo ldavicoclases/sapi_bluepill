@@ -130,6 +130,14 @@ typedef enum {
    SPI_2
 } spiMap_t;
 
+/*Defined for sapi_encoder.h*/
+typedef enum {
+   ENC_TIM1,
+   ENC_TIM2,
+   ENC_TIM3,
+   ENC_TIM4
+} encoderMap_t;
+
 /*==================[c++]====================================================*/
 #ifdef __cplusplus
 }
