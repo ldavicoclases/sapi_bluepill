@@ -69,10 +69,10 @@ TIM_HandleTypeDef htimer3;
 TIM_HandleTypeDef htimer4;
 
 static const timerEncStmInit_t stmEncTimers[] = {
-// { timerAddr, { {ch1Port, ch1pin}, ch1mode }, { {ch2Port, ch2pin}, ch2mode },  { {ch3Port, ch3pin}, ch3mode }, { {ch4Port, ch4pin}, ch4mode } },
+// { timerAddr, { {ch12Port, ch12pin}, ch12mode,ch12pull,ch12speed },}
    {
       &htimer1,
-      {{GPIOA, GPIO_PIN_8|GPIO_PIN_8 }, GPIO_MODE_INPUT, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
+      {{GPIOA, GPIO_PIN_8|GPIO_PIN_9 }, GPIO_MODE_INPUT, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
    },
    {
       &htimer2,
@@ -87,28 +87,22 @@ static const timerEncStmInit_t stmEncTimers[] = {
       {{GPIOB, GPIO_PIN_6|GPIO_PIN_7 }, GPIO_MODE_INPUT, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH},
    },
 };
-//
-//#define NUMBER_OF_TIMERS (sizeof(stmTimers)/sizeof(timerStmInit_t)) /* calcula automaticamente la cantidad de timers
-//                                                                       de acuerdo a lo llenado en el array anterior */
-//
-//uint32_t channel[]={TIM_CHANNEL_1,TIM_CHANNEL_2,TIM_CHANNEL_3,TIM_CHANNEL_4};
-//
-///*==================[internal functions declaration]=========================*/
-// * @brief:   adds encoder to the the list of working encoders
-// * @param:   encoderNumber:   ID of the encoder, check encoderMap_t
-// * @return:   True if encoder was successfully attached, False if not.
-// */
-//static bool_t encoderAttach( encoderMap_t encoderNumber );
-//
-///*
-// * @brief:   removes encoder (attached to encoderNumber) from the list
-// * @param:   encoderNumber:   ID of the pwm, check encoderMap_t
-// * @return:    True if encoder was successfully detached, False if not.
-// */
-//static bool_t encoderDetach( encoderMap_t encoderNumber );
-//
-//
-//
+
+/*==================[internal functions declaration]=========================*/
+
+/* @brief:   adds encoder to the the list of working encoders
+ * @param:   encoderNumber:   ID of the encoder, check encoderMap_t
+ * @return:   True if encoder was successfully attached, False if not.
+ */
+static bool_t encoderAttach( encoderMap_t encoderNumber );
+
+/*
+ * @brief:   removes encoder (attached to encoderNumber) from the list
+ * @param:   encoderNumber:   ID of the encoder, check encoderMap_t
+ * @return:    True if encoder was successfully detached, False if not.
+ */
+static bool_t encoderDetach( encoderMap_t encoderNumber );
+
 /*
  * @Brief: Initializes the encoder peripheral.
  * @param  uint8_t ecoderNumber
@@ -257,62 +251,57 @@ static bool_t encoderDetach( encoderMap_t encoderNumber )
    }
    return success;
 }
-//
-///*==================[external functions definition]==========================*/
-//
-///*
-// * @brief:   change the value of the pwm at the selected pin
-// * @param:   pwmNumber:   ID of the pwm, from 0 to 15
-// * @param:   value:   8bit value, from 0 to 255
-// * @return:   True if the value was successfully changed, False if not.
-// */
-//bool_t pwmWrite( pwmMap_t pwmNumber, uint8_t value )
-//{
-//   TIM_HandleTypeDef* handle = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
-//   bool_t success = FALSE;
-//   uint8_t position = 0;
-//   uint16_t pwmPeriod = ((uint16_t)handle->Init.Period*value)/255;
-//
-//   position = pwmIsAttached(pwmNumber);
-//
-//   if(position) {
-//      __HAL_TIM_SET_COMPARE(handle, channel[pwmNumber/NUMBER_OF_TIMERS], pwmPeriod);
-//      success = TRUE;
-//   }
-//
-//   return success;
-//}
-//
-///*
-// * @brief:   read the value of the pwm in the pin
-// * @param:   pwmNumber:   ID of the pwm, from 0 to 15
-// * @return:   value of the pwm in the pin (0 ~ 255).
-// *   If an error ocurred, return = EMPTY_POSITION = 255
-// */
-//bool_t pwmRead( pwmMap_t pwmNumber, uint8_t* rv )
-//{
-//   TIM_HandleTypeDef* handle = stmTimers[pwmNumber%NUMBER_OF_TIMERS].timer;
-//   uint8_t position = 0;
-//   position = pwmIsAttached(pwmNumber);
-//   uint16_t pwmPeriod = (uint16_t)handle->Init.Period;
-//   uint32_t value=0;
-//
-//   if(position) {
-//       value= (__HAL_TIM_GET_COMPARE(handle, channel[pwmNumber/NUMBER_OF_TIMERS]));
-//       value*=255;
-//       value/=pwmPeriod;
-//       if(value)
-//           value++;    // por redondeo siempre devuelve una unidad menos
-//       *rv = (uint8_t)value;
-//   } else {
-//       return FALSE;
-//   }
-//
-//   return TRUE;
-//}
-//
+
+/*==================[external functions definition]==========================*/
+
 /*
- * @Brief: Initializes the pwm peripheral.
+ * @brief:   change the value of the encoder at the correspondent timer
+ * @param:   encoderNumber:   ID of the encoder, see in encoderMap_t
+ * @param:   value:   16bit value, from 0 to 65535
+ * @return:   True if the value was successfully changed, False if not.
+ */
+bool_t encoderWrite( encoderMap_t encoderNumber, uint16_t value )
+{
+    TIM_HandleTypeDef* aux = stmEncTimers[encoderNumber].timer;
+    uint8_t position = 0;
+    position = encoderIsAttached(encoderNumber);
+    uint32_t regValue=0;
+
+    if(position) {
+      WRITE_REG(aux->Instance->CNT,(regValue|value));
+    }
+    else {
+      return FALSE;
+    }
+
+    return TRUE;
+
+
+}
+
+/*
+ * @brief:   read the value of the encoder in the timer
+ * @param:   encoderNumber:   ID of the encoder, see in encoderMap_t
+ * @param:   rv:   Pointer to variable where the reading will be stored
+ * @return:  bool_t true (1) if reading  is ok, false if encoder is not attached
+ */
+bool_t encoderRead( encoderMap_t encoderNumber, uint16_t* rv )
+{
+   TIM_HandleTypeDef* aux = stmEncTimers[encoderNumber].timer;
+   uint8_t position = 0;
+   position = encoderIsAttached(encoderNumber);
+
+   if(position) {
+       *rv = (uint16_t)(READ_REG(aux->Instance->CNT)&0x0000FFFF);
+   } else {
+       return FALSE;
+   }
+
+   return TRUE;
+}
+
+/*
+ * @Brief: Initializes the encoder peripheral.
  * @param  encoderMap_t encoderNumber
  * @param  pwmInit_t config
  * @return bool_t true (1) if config it is ok

@@ -130,7 +130,7 @@ bool_t encoderRead( encoderMap_t pwmNumber, uint16_t* rv );
  * @param:   value:   16bit value, from 0 to 65535
  * @return:   True if the value was successfully changed, False if not.
  */
-bool_t encoderWrite( pwmMap_t pwmNumber, uint16_t value );
+bool_t encoderWrite( encoderMap_t encoderNumber, uint16_t value );
 
 /*==================[c++]====================================================*/
 #ifdef __cplusplus

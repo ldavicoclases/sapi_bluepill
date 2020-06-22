@@ -76,8 +76,9 @@ int main(void)
     }
     i = 0;
 
-    while (1)
-    {
+      while (1)
+      {
+
         if( delayRead(&tiempo_encendido) ) {
             gpioToggle(PC13);
             gpioToggle(secuencia[i]);
