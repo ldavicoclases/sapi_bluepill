@@ -112,7 +112,7 @@ bool_t encoderInit( encoderMap_t encoderNumber, encoderInit_t config);
  * @param:   encoderNumber:   ID of the encoder, see encoderMap_t
  * @return:   position (1 ~ ENCODER_TOTALNUMBER), 0 if the element was not found.
  */
-uint8_t encoderIsAttached( encoderMap_t pwmNumber );
+uint8_t encoderIsAttached( encoderMap_t encoderNumber );
 
 
 /*
@@ -122,7 +122,7 @@ uint8_t encoderIsAttached( encoderMap_t pwmNumber );
  * @return:  bool_t true (1) if reading  is ok, false if encoder is not attached
  *
  */
-bool_t encoderRead( encoderMap_t pwmNumber, uint16_t* rv );
+bool_t encoderRead( encoderMap_t encoderNumber, uint16_t* rv );
 
 /*
  * @brief:   change the value of the encoder at the correspondent timer

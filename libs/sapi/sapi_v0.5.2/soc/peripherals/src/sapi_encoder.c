@@ -38,7 +38,7 @@
 
 /*==================[   WARNING!!!   ]=======================================*/
 /*      This peripheral share the hardware timers with PWM peripheral.
- *      You should not use an PWM timer and same Encoder Timer at once
+ *      You should not use a PWM timer and same Encoder Timer at once
  *      Is user's responsibility to check that.
  */
 /*==================[macros and definitions]=================================*/
@@ -223,7 +223,7 @@ static bool_t encoderAttach( encoderMap_t encoderNumber)
    position = encoderIsAttached(encoderNumber);
    if(position==0) {
       position = encoderIsAttached(EMPTY_POSITION); /* Searches for the first empty position */
-      if(position) { /* if position==0 => there is no room in the list for another pwm */
+      if(position) { /* if position==0 => there is no room in the list for another encoder */
          AttachedEncoderList[position-1] = encoderNumber;
          success = TRUE;
       }
@@ -234,7 +234,7 @@ static bool_t encoderAttach( encoderMap_t encoderNumber)
 //
 ///*
 // * @brief:   removes encoder (attached to encoderNumber) from the list
-// * @param:   emcoderNumber:   ID of the pwm
+// * @param:   emcoderNumber:   ID of the encoder
 // * @return:    True if encoder was successfully detached, False if not.
 // */
 static bool_t encoderDetach( encoderMap_t encoderNumber )
@@ -303,7 +303,7 @@ bool_t encoderRead( encoderMap_t encoderNumber, uint16_t* rv )
 /*
  * @Brief: Initializes the encoder peripheral.
  * @param  encoderMap_t encoderNumber
- * @param  pwmInit_t config
+ * @param  encoderInit_t config
  * @return bool_t true (1) if config it is ok
  */
 bool_t encoderInit( encoderMap_t encoderNumber, encoderInit_t config)
@@ -334,9 +334,9 @@ bool_t encoderInit( encoderMap_t encoderNumber, encoderInit_t config)
 }
 //
 ///*
-// * @brief:   Tells if the pwm is currently active, and its position
-// * @param:   pwmNumber:   ID of the pwm, from 0 to 10
-// * @return:   position (1 ~ PWM_TOTALNUMBER), 0 if the element was not found.
+// * @brief:   Tells if the encoder is currently active, and its position
+// * @param:   encoderNumber:   ID of the encoder, from 0 to 10
+// * @return:   position (1 ~ encoderODER_TOTALNUMBER), 0 if the element was not found.
 // */
 uint8_t encoderIsAttached( encoderMap_t encoderNumber )
 {

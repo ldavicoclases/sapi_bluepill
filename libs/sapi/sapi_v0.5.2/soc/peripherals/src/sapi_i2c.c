@@ -41,6 +41,7 @@
  * 2016-08-07 Eric Pernia - Improve names
  * 2016-09-10 Eric Pernia - Add unlimited buffer transfer
  * 2016-11-20 Eric Pernia - Software I2C
+ * 2020-06-15 Guillermo Ferrari - stm32f103c8t6 Adapted
  */
 
 /*==================[inclusions]=============================================*/
