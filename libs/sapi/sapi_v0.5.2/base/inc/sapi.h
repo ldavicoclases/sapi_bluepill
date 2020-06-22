@@ -68,8 +68,9 @@
 #include "sapi_convert.h"                // Use <string.h>
 
 #include "sapi_delay.h"                  // Use sapi_tick module
-#include "sapi_pwm.h"                    // Use sapi_sct and sapi_gpio modules
+#include "sapi_pwm.h"                    // Use sapi_gpio modules
 #include "sapi_circularBuffer.h"         // It has no dependencies
+#include "sapi_encoder.h"                    // Use sapi_gpio modules
 
 #include "sapi_button.h"                 // Use sapi_gpio module
 
