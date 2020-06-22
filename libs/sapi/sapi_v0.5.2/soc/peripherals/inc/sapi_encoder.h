@@ -93,7 +93,8 @@ extern "C" {
 typedef enum{
     ENCODER_COUNT_CHANNEL_1,
     ENCODER_COUNT_CHANNEL_2,
-    ENCODER_COUNT_CHANNEL_ALL  //count on both channels
+    ENCODER_COUNT_CHANNEL_ALL,  //count on both channels
+    ENCODER_COUNT_DISABLE
 } encoderInit_t;
 
 /*==================[external functions declaration]=========================*/
@@ -104,7 +105,7 @@ typedef enum{
  * @param  uint8_t config
  * @return bool_t true (1) if config it is ok
  */
-bool_t encoderInit( ecoderMap_t encoderNumber, encoderInit_t config);
+bool_t encoderInit( encoderMap_t encoderNumber, encoderInit_t config);
 
 /*
  * @brief:   Tells if the encoder is currently active, and its position
