@@ -210,7 +210,7 @@ static void pwmInitTimers(pwmMap_t pwmNumber)
             break;
     }
     
-    handle->Init.Prescaler = 0;
+
     handle->Init.CounterMode = TIM_COUNTERMODE_UP;
     handle->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     handle->Init.RepetitionCounter = 0;
