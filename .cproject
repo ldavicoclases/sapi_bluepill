@@ -10,6 +10,7 @@
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -40,6 +41,9 @@
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.24770444" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../libs/cmsis_core/inc"/>
+									<listOptionValue builtIn="false" value="../libs/FATFS/App"/>
+									<listOptionValue builtIn="false" value="../libs/FATFS/Target"/>
+									<listOptionValue builtIn="false" value="../libs/FATFS/Third_Party/FatFs/src"/>
 									<listOptionValue builtIn="false" value="../libs/cmsis_core/device/STM32F1xx/inc"/>
 									<listOptionValue builtIn="false" value="../libs/sapi/sapi_v0.5.2/soc/core/inc"/>
 									<listOptionValue builtIn="false" value="../libs/sapi/sapi_v0.5.2/soc/peripherals/inc"/>
@@ -50,7 +54,8 @@
 									<listOptionValue builtIn="false" value="../libs/STM32F1xx_HAL/inc"/>
 									<listOptionValue builtIn="false" value="../libs/STM32F1xx_HAL/inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../base/inc"/>
-									<listOptionValue builtIn="false" value="../example/inc"/>
+									<listOptionValue builtIn="false" value="../examples/inc"/>
+									<listOptionValue builtIn="false" value="../app/inc"/>
 									<listOptionValue builtIn="false" value="../libs/usblib/STM32_USB_Device_Library/Class/CDC/Inc"/>
 									<listOptionValue builtIn="false" value="../libs/usblib/STM32_USB_Device_Library/Core/Inc"/>
 									<listOptionValue builtIn="false" value="../libs/usblib/USB_DEVICE/App"/>
@@ -98,6 +103,7 @@
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -192,6 +198,8 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="debug"/>
+		<configuration configurationName="release"/>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/sapi_bluepill"/>
 		</configuration>
