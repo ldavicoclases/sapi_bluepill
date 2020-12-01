@@ -312,7 +312,7 @@ static bool_t i2cHardwareInit( i2cMap_t i2cNumber, uint32_t clockRateHz )
             __HAL_RCC_I2C2_CLK_ENABLE();
             break;
     }
-    aux->Instance = I2C1;
+
     aux->Init.ClockSpeed = clockRateHz;
     aux->Init.DutyCycle = I2C_DUTYCYCLE_2;
     aux->Init.OwnAddress1 = 0;
@@ -321,12 +321,11 @@ static bool_t i2cHardwareInit( i2cMap_t i2cNumber, uint32_t clockRateHz )
     aux->Init.OwnAddress2 = 0;
     aux->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
     aux->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+
     if (HAL_I2C_Init(aux) != HAL_OK)
     {
       Error_Handler();
     }
-
-
 
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
