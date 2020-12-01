@@ -17,10 +17,10 @@
 int main(void) {
 	boardInit();
 
-	// Para probar algún ejemplo se puede llamar la función que corresponda:
+	// Para probar algún ejemplo se puede llamar a la función que corresponda:
 	// run_example_uart();
 	// run_example_rtc();
-	run_example_usb();
+	// run_example_usb();
 
 	while (1) {
 		delay(1);
